@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobarecci - 남성 화장품 플랫폼</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // ==========================================
+        // 1. 아이콘 컴포넌트 (Lucide React)
+        // ==========================================
+        const Search = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>);
+        const Heart = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>);
+        const Star = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>);
+        const Award = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>);
+        const ShoppingCart = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>);
+        const X = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>);
+        const AlertCircle = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>);
+        const TrendingUp = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>);
+        const Filter = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>);
+        const ChevronDown = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>);
+
+        // ==========================================
+        // 2. 통합 데이터 (80개 제품)
+        // ==========================================
+        const PRODUCTS = [
+            {"id": "prod_62", "name": "[백화점/선물포장] 샤넬 알뤼르 옴므 스포츠 샤워 젤 200ml", "brand": "백화점/선물포장", "category": "기타", "price": 90000, "priceRange": "4만원 이상", "rating": 4.1, "reviewCount": 251, "safetyScore": 96, "image": "https://shopping-phinf.pstatic.net/main_8896607/88966071460.2.jpg", "mainIngredients": ["히알루론산", "판테놀", "세라마이드"], "concerns": ["향료"], "skinTypes": ["모든피부"], "skinConcerns": ["보습"], "shops": [{"name": "바이헌 코스메틱", "price": 90000, "url": "https://smartstore.naver.com/main/products/11421561095"}]},
+            {"id": "prod_40", "name": "비오템 옴므 아쿠아 파워 어드밴스드 젤 100ml, 1개", "brand": "비오템", "category": "기타", "price": 57900, "priceRange": "4만원 이상", "rating": 4.8, "reviewCount": 318, "safetyScore": 88, "image": "https://shopping-phinf.pstatic.net/main_5192921/51929217882.20241213205201.jpg", "mainIngredients": ["알란토인", "히알루론산", "비타민E"], "concerns": ["향료"], "skinTypes": ["모든피부"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "네이버", "price": 57900, "url": "https://search.shopping.naver.com/catalog/51929217882"}]},
+            {"id": "prod_29", "name": "키엘 훼이셜 퓨얼 에너자이징 모이스처 트리트먼트 포 맨 200ml, 1개", "brand": "키엘", "category": "기타", "price": 55000, "priceRange": "4만원 이상", "rating": 4.1, "reviewCount": 181, "safetyScore": 91, "image": "https://shopping-phinf.pstatic.net/main_5192930/51929301843.20241213211016.jpg", "mainIngredients": ["히알루론산", "알란토인", "판테놀"], "concerns": ["향료"], "skinTypes": ["모든피부"], "skinConcerns": ["보습"], "shops": [{"name": "네이버", "price": 55000, "url": "https://search.shopping.naver.com/catalog/51929301843"}]},
+            {"id": "prod_84", "name": "아라미스 애프터 쉐이브 200ml, 1개", "brand": "아라미스", "category": "기타", "price": 37500, "priceRange": "3-4만원", "rating": 4.2, "reviewCount": 572, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_5192918/51929180291.20241213204459.jpg", "mainIngredients": ["세라마이드", "비타민E", "히알루론산"], "concerns": ["향료"], "skinTypes": ["건성"], "skinConcerns": ["수분부족"], "shops": [{"name": "네이버", "price": 37500, "url": "https://search.shopping.naver.com/catalog/51929180291"}]},
+            {"id": "prod_87", "name": "키엘 페이셜 퓨얼 에너자이징 토닉 포 맨 250ml, 1개", "brand": "키엘", "category": "기타", "price": 27640, "priceRange": "2-3만원", "rating": 4.3, "reviewCount": 523, "safetyScore": 98, "image": "https://shopping-phinf.pstatic.net/main_5192935/51929354965.20241213212057.jpg", "mainIngredients": ["세라마이드", "히알루론산", "알란토인"], "concerns": ["향료"], "skinTypes": ["건성"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "네이버", "price": 27640, "url": "https://search.shopping.naver.com/catalog/51929354965"}]},
+            {"id": "prod_35", "name": "피지오겔 데일리 모이스쳐 테라피 포맨 플루이드 100ml, 1개", "brand": "피지오겔", "category": "기타", "price": 21990, "priceRange": "2-3만원", "rating": 4.2, "reviewCount": 362, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_5192937/51929370639.20241213212243.jpg", "mainIngredients": ["알란토인", "비타민E", "판테놀"], "concerns": ["향료"], "skinTypes": ["모든피부"], "skinConcerns": ["수분부족"], "shops": [{"name": "네이버", "price": 21990, "url": "https://search.shopping.naver.com/catalog/51929370639"}]},
+            {"id": "prod_27", "name": "오휘 포 맨 네오필 모이스처라이징 에멀전 135ml, 1개", "brand": "오휘", "category": "기타", "price": 10420, "priceRange": "2만원 이하", "rating": 4.2, "reviewCount": 462, "safetyScore": 92, "image": "https://shopping-phinf.pstatic.net/main_5192902/51929028415.20241213203036.jpg", "mainIngredients": ["히알루론산", "판테놀", "알란토인"], "concerns": ["알코올"], "skinTypes": ["건성"], "skinConcerns": ["보습"], "shops": [{"name": "네이버", "price": 10420, "url": "https://search.shopping.naver.com/catalog/51929028415"}]},
+            {"id": "prod_44", "name": "설화수 맨 본윤 데일리 루틴2종 기획 본윤 남성 스킨로션 옴므 아버지 화장품 선물 세트", "brand": "설화수", "category": "로션", "price": 63900, "priceRange": "4만원 이상", "rating": 4.1, "reviewCount": 401, "safetyScore": 86, "image": "https://shopping-phinf.pstatic.net/main_8631694/86316948772.37.jpg", "mainIngredients": ["알로에베라", "녹차추출물", "스쿠알란"], "concerns": ["알코올"], "skinTypes": ["모든피부"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "뷰티로움", "price": 63900, "url": "https://smartstore.naver.com/main/products/8772448449"}]},
+            {"id": "prod_71", "name": "홀츠포맨 더블 이펙트 화이트닝 세트 3종, 스킨+로션+세럼", "brand": "홀츠포맨", "category": "로션", "price": 62390, "priceRange": "4만원 이상", "rating": 4.2, "reviewCount": 182, "safetyScore": 92, "image": "https://shopping-phinf.pstatic.net/main_5674152/56741522950.20250915144334.jpg", "mainIngredients": ["글리세린", "녹차추출물", "알로에베라"], "concerns": ["알코올"], "skinTypes": ["건성"], "skinConcerns": ["수분부족"], "shops": [{"name": "네이버", "price": 62390, "url": "https://search.shopping.naver.com/catalog/56741522950"}]},
+            {"id": "prod_43", "name": "설화수 맨 본윤 2종 데일리 루틴 남성 화장품 스킨 로션 에센스 옴므 선물 세트", "brand": "설화수", "category": "로션", "price": 61900, "priceRange": "4만원 이상", "rating": 4.0, "reviewCount": 350, "safetyScore": 85, "image": "https://shopping-phinf.pstatic.net/main_8372830/83728302526.14.jpg", "mainIngredients": ["스쿠알란", "녹차추출물", "병풀추출물"], "concerns": ["파라벤"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "파나시아", "price": 61900, "url": "https://smartstore.naver.com/main/products/6183802949"}]},
+            {"id": "prod_72", "name": "홀츠포맨 화이트닝 스킨로션 에센스 올인원 세트 3종, 스킨+로션+세럼", "brand": "홀츠포맨", "category": "로션", "price": 58700, "priceRange": "4만원 이상", "rating": 4.5, "reviewCount": 555, "safetyScore": 85, "image": "https://shopping-phinf.pstatic.net/main_5674074/56740746183.20250915123631.jpg", "mainIngredients": ["스쿠알란", "알로에베라", "병풀추출물"], "concerns": ["파라벤"], "skinTypes": ["건성"], "skinConcerns": ["피지과다", "모공"], "shops": [{"name": "네이버", "price": 58700, "url": "https://search.shopping.naver.com/catalog/56740746183"}]},
+            {"id": "prod_45", "name": "헤라 옴므 2종 기획 세트 베이직 스페셜 남성 스킨로션 남자 화장품 선물", "brand": "헤라", "category": "로션", "price": 49700, "priceRange": "4만원 이상", "rating": 4.9, "reviewCount": 479, "safetyScore": 99, "image": "https://shopping-phinf.pstatic.net/main_8498607/84986071582.4.jpg", "mainIngredients": ["글리세린", "녹차추출물", "스쿠알란"], "concerns": ["파라벤"], "skinTypes": ["건성"], "skinConcerns": ["피지과다", "모공"], "shops": [{"name": "빨리바카", "price": 49700, "url": "https://smartstore.naver.com/main/products/7441571260"}]},
+            {"id": "prod_30", "name": "랩시리즈 데일리 레스큐 에너자이징 페이스 로션 50ml, 1개", "brand": "랩시리즈", "category": "로션", "price": 48990, "priceRange": "4만원 이상", "rating": 4.2, "reviewCount": 522, "safetyScore": 97, "image": "https://shopping-phinf.pstatic.net/main_5192934/51929348830.20241213211855.jpg", "mainIngredients": ["녹차추출물", "스쿠알란", "글리세린"], "concerns": ["알코올"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["피지과다", "모공"], "shops": [{"name": "네이버", "price": 48990, "url": "https://search.shopping.naver.com/catalog/51929348830"}]},
+            {"id": "prod_41", "name": "헤라 NEW 옴므 2종 기획 세트+쇼핑백 스페셜 남자 화장품 남성 올인원 스킨로션 선물", "brand": "헤라", "category": "로션", "price": 46900, "priceRange": "4만원 이상", "rating": 4.3, "reviewCount": 563, "safetyScore": 98, "image": "https://shopping-phinf.pstatic.net/main_8208408/82084083327.39.jpg", "mainIngredients": ["병풀추출물", "녹차추출물", "글리세린"], "concerns": ["파라벤"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "레드밤", "price": 46900, "url": "https://smartstore.naver.com/main/products/4539560019"}]},
+            {"id": "prod_88", "name": "캘빈클라인 CK 이터너티 포맨 애프터 쉐이브 로션(스킨) 100ml", "brand": "캘빈클라인", "category": "로션", "price": 31700, "priceRange": "3-4만원", "rating": 4.7, "reviewCount": 287, "safetyScore": 92, "image": "https://shopping-phinf.pstatic.net/main_8941693/89416934812.1.jpg", "mainIngredients": ["병풀추출물", "알로에베라", "녹차추출물"], "concerns": ["파라벤"], "skinTypes": ["건성"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "PerfumeFit", "price": 31700, "url": "https://smartstore.naver.com/main/products/11872424218"}]},
+            {"id": "prod_26", "name": "랩시리즈 데일리 레스큐 워터 로션 200ml, 1개", "brand": "랩시리즈", "category": "로션", "price": 31690, "priceRange": "3-4만원", "rating": 4.2, "reviewCount": 192, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_5192958/51929589850.20241213221902.jpg", "mainIngredients": ["알로에베라", "스쿠알란", "글리세린"], "concerns": ["파라벤"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "네이버", "price": 31690, "url": "https://search.shopping.naver.com/catalog/51929589850"}]},
+            {"id": "prod_42", "name": "오휘 포맨 네오필 2종 남자 화장품 선물 남성 스킨 로션 옴므 기초 세트", "brand": "오휘", "category": "로션", "price": 27900, "priceRange": "2-3만원", "rating": 4.0, "reviewCount": 430, "safetyScore": 90, "image": "https://shopping-phinf.pstatic.net/main_8209669/82096696492.5.jpg", "mainIngredients": ["알로에베라", "글리세린", "녹차추출물"], "concerns": ["알코올"], "skinTypes": ["모든피부"], "skinConcerns": ["피지과다", "모공"], "shops": [{"name": "뷰라벨", "price": 27900, "url": "https://smartstore.naver.com/main/products/4552176440"}]},
+            {"id": "prod_33", "name": "라운드랩 포 맨 자작나무 수분 로션 200ml, 1개", "brand": "라운드랩", "category": "로션", "price": 16910, "priceRange": "2만원 이하", "rating": 4.8, "reviewCount": 448, "safetyScore": 98, "image": "https://shopping-phinf.pstatic.net/main_5192931/51929312752.20241213211245.jpg", "mainIngredients": ["글리세린", "알로에베라", "녹차추출물"], "concerns": ["파라벤"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["수분부족"], "shops": [{"name": "네이버", "price": 16910, "url": "https://search.shopping.naver.com/catalog/51929312752"}]},
+            {"id": "prod_34", "name": "오휘 마이스터 포맨 프레쉬 로션 110ml, 1개", "brand": "오휘", "category": "로션", "price": 16770, "priceRange": "2만원 이하", "rating": 4.2, "reviewCount": 442, "safetyScore": 92, "image": "https://shopping-phinf.pstatic.net/main_5192929/51929294701.20241213210851.jpg", "mainIngredients": ["녹차추출물", "알로에베라", "병풀추출물"], "concerns": ["알코올"], "skinTypes": ["모든피부"], "skinConcerns": ["피지과다", "모공"], "shops": [{"name": "네이버", "price": 16770, "url": "https://search.shopping.naver.com/catalog/51929294701"}]},
+            {"id": "prod_83", "name": "멘넨 남성화장품 215ml 2개 스킨로션 남자화장품 스킨브레이서 미백 에프터 애프터쉐이브", "brand": "멘넨", "category": "로션", "price": 15500, "priceRange": "2만원 이하", "rating": 4.5, "reviewCount": 285, "safetyScore": 90, "image": "https://shopping-phinf.pstatic.net/main_8239510/82395108815.4.jpg", "mainIngredients": ["알로에베라", "글리세린", "병풀추출물"], "concerns": ["파라벤"], "skinTypes": ["모든피부"], "skinConcerns": ["수분부족"], "shops": [{"name": "플러스미", "price": 15500, "url": "https://smartstore.naver.com/main/products/4850585579"}]},
+            {"id": "prod_81", "name": "남성화장품 멘넨 스킨브레이서 스킨 165ml 2개 + 로션 165ml 1개 세트", "brand": "남성화장품", "category": "로션", "price": 10900, "priceRange": "2만원 이하", "rating": 4.8, "reviewCount": 458, "safetyScore": 93, "image": "https://shopping-phinf.pstatic.net/main_9010877/90108778359.jpg", "mainIngredients": ["스쿠알란", "글리세린", "알로에베라"], "concerns": ["파라벤"], "skinTypes": ["건성"], "skinConcerns": ["수분부족"], "shops": [{"name": "살림콕", "price": 10900, "url": "https://smartstore.naver.com/main/products/12564267506"}]},
+            {"id": "prod_82", "name": "남성화장품 멘넨 스킨브레이서 스킨 165ml + 로션 165ml 세트", "brand": "남성화장품", "category": "로션", "price": 6900, "priceRange": "2만원 이하", "rating": 4.7, "reviewCount": 157, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_9010875/90108755773.jpg", "mainIngredients": ["글리세린", "알로에베라", "스쿠알란"], "concerns": ["파라벤"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "살림콕", "price": 6900, "url": "https://smartstore.naver.com/main/products/12564244920"}]},
+            {"id": "prod_98", "name": "히든올가 60매 뽑아쓰는 1일1팩 수분 얼굴 피부진정팩 미백 남자 마스크팩 효과 행사 100", "brand": "히든올가", "category": "마스크팩", "price": 29900, "priceRange": "2-3만원", "rating": 4.2, "reviewCount": 182, "safetyScore": 97, "image": "https://shopping-phinf.pstatic.net/main_8224534/82245345120.10.jpg", "mainIngredients": ["알란토인", "비타민E", "판테놀"], "concerns": ["알코올"], "skinTypes": ["모든피부"], "skinConcerns": ["수분부족"], "shops": [{"name": "ororo", "price": 29900, "url": "https://smartstore.naver.com/main/products/4700824262"}]},
+            {"id": "prod_100", "name": "1+1 뽑아쓰는 히알루론산 마스크팩 1일1팩 임산부 남자 얼굴 수분진정", "brand": "1+1", "category": "마스크팩", "price": 23500, "priceRange": "2-3만원", "rating": 4.2, "reviewCount": 552, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_8781921/87819210440.jpg", "mainIngredients": ["판테놀", "세라마이드", "비타민E"], "concerns": ["향료"], "skinTypes": ["건성"], "skinConcerns": ["수분부족"], "shops": [{"name": "ororo", "price": 23500, "url": "https://smartstore.naver.com/main/products/10274706616"}]},
+            {"id": "prod_97", "name": "메디힐 남자 마스크팩 블랙 숯 화이트닝 팩 WHP HDP 총 10매", "brand": "메디힐", "category": "마스크팩", "price": 12700, "priceRange": "2만원 이하", "rating": 4.7, "reviewCount": 127, "safetyScore": 92, "image": "https://shopping-phinf.pstatic.net/main_8384827/83848270291.2.jpg", "mainIngredients": ["비타민E", "히알루론산", "세라마이드"], "concerns": ["알코올"], "skinTypes": ["모든피부"], "skinConcerns": ["수분부족"], "shops": [{"name": "너를 그리는 시간", "price": 12700, "url": "https://smartstore.naver.com/main/products/6303767802"}]},
+            {"id": "prod_96", "name": "1일1팩 뽑아쓰는 어성초 마스크팩 임산부 남자 얼굴팩 수분진정", "brand": "1일1팩", "category": "마스크팩", "price": 9900, "priceRange": "2만원 이하", "rating": 4.7, "reviewCount": 127, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_8593345/85933457051.jpg", "mainIngredients": ["판테놀", "세라마이드", "히알루론산"], "concerns": ["향료"], "skinTypes": ["민감성"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "ororo", "price": 9900, "url": "https://smartstore.naver.com/main/products/8388956728"}]},
+            {"id": "prod_89", "name": "피지오겔 데일리 모이스쳐 테라피 포맨 에센셜 토너 200ml, 1개", "brand": "피지오겔", "category": "스킨", "price": 19990, "priceRange": "2만원 이하", "rating": 4.7, "reviewCount": 327, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_5192919/51929193439.20241213205033.jpg", "mainIngredients": ["비타민E", "세라마이드", "판테놀"], "concerns": ["향료"], "skinTypes": ["민감성"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "네이버", "price": 19990, "url": "https://search.shopping.naver.com/catalog/51929193439"}]},
+            {"id": "prod_90", "name": "닥터지 레드 블레미쉬 포 맨 멀티 수딩 토너 200ml(민감성), 1개", "brand": "닥터지", "category": "스킨", "price": 12990, "priceRange": "2만원 이하", "rating": 4.8, "reviewCount": 388, "safetyScore": 93, "image": "https://shopping-phinf.pstatic.net/main_5192950/51929508998.20241213220821.jpg", "mainIngredients": ["알란토인", "판테놀", "세라마이드"], "concerns": ["향료"], "skinTypes": ["민감성"], "skinConcerns": ["수분부족"], "shops": [{"name": "네이버", "price": 12990, "url": "https://search.shopping.naver.com/catalog/51929508998"}]},
+            {"id": "prod_86", "name": "오휘 포 맨 네오필 하이드레이팅 토너 135ml, 1개", "brand": "오휘", "category": "스킨", "price": 9560, "priceRange": "2만원 이하", "rating": 4.9, "reviewCount": 439, "safetyScore": 89, "image": "https://shopping-phinf.pstatic.net/main_5192947/51929479651.20241213215903.jpg", "mainIngredients": ["히알루론산", "알란토인", "비타민E"], "concerns": ["알코올"], "skinTypes": ["모든피부"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "네이버", "price": 9560, "url": "https://search.shopping.naver.com/catalog/51929479651"}]},
+            {"id": "prod_69", "name": "비오템옴므 포스 수프림 필 에센스 150ml, 1개", "brand": "비오템옴므", "category": "에센스", "price": 88530, "priceRange": "4만원 이상", "rating": 4.4, "reviewCount": 274, "safetyScore": 94, "image": "https://shopping-phinf.pstatic.net/main_5686349/56863496594.20250922145611.jpg", "mainIngredients": ["비타민C", "펩타이드", "콜라겐"], "concerns": ["파라벤"], "skinTypes": ["모든피부"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "네이버", "price": 88530, "url": "https://search.shopping.naver.com/catalog/56863496594"}]},
+            {"id": "prod_68", "name": "비오템 포스 수프림 필 에센스 150ml, 1개", "brand": "비오템", "category": "에센스", "price": 74370, "priceRange": "4만원 이상", "rating": 4.2, "reviewCount": 412, "safetyScore": 92, "image": "https://shopping-phinf.pstatic.net/main_5192947/51929476519.20241213220526.jpg", "mainIngredients": ["콜라겐", "알부틴", "펩타이드"], "concerns": ["인공향료"], "skinTypes": ["복합성"], "skinConcerns": ["미백", "톤업"], "shops": [{"name": "네이버", "price": 74370, "url": "https://search.shopping.naver.com/catalog/51929476519"}]},
+            {"id": "prod_76", "name": "올리브영 남자 남성 앰플 엠플 에센스 세럼", "brand": "올리브영", "category": "에센스", "price": 39900, "priceRange": "3-4만원", "rating": 4.7, "reviewCount": 267, "safetyScore": 92, "image": "https://shopping-phinf.pstatic.net/main_8649092/86490925286.jpg", "mainIngredients": ["펩타이드", "알부틴", "레티놀"], "concerns": ["파라벤"], "skinTypes": ["모든피부"], "skinConcerns": ["안티에이징"], "shops": [{"name": "unitshop", "price": 39900, "url": "https://smartstore.naver.com/main/products/8946424963"}]},
+            {"id": "prod_80", "name": "더와이 스무스 앰플 100ml, 1개", "brand": "더와이", "category": "에센스", "price": 39200, "priceRange": "3-4만원", "rating": 4.8, "reviewCount": 388, "safetyScore": 93, "image": "https://shopping-phinf.pstatic.net/main_5192922/51929221971.20241213205231.jpg", "mainIngredients": ["알부틴", "레티놀", "펩타이드"], "concerns": ["인공향료"], "skinTypes": ["건성", "노화"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "네이버", "price": 39200, "url": "https://search.shopping.naver.com/catalog/51929221971"}]},
+            {"id": "prod_66", "name": "설화수 본윤 에센스 140ml, 1개", "brand": "설화수", "category": "에센스", "price": 37830, "priceRange": "3-4만원", "rating": 4.4, "reviewCount": 554, "safetyScore": 99, "image": "https://shopping-phinf.pstatic.net/main_5192929/51929293158.20241213211520.jpg", "mainIngredients": ["레티놀", "콜라겐", "비타민C"], "concerns": ["인공향료"], "skinTypes": ["복합성"], "skinConcerns": ["미백", "톤업"], "shops": [{"name": "네이버", "price": 37830, "url": "https://search.shopping.naver.com/catalog/51929293158"}]},
+            {"id": "prod_77", "name": "MISSHA 맨즈 큐어 앰플 에센스 150ml, 1개", "brand": "MISSHA", "category": "에센스", "price": 35100, "priceRange": "3-4만원", "rating": 4.4, "reviewCount": 184, "safetyScore": 89, "image": "https://shopping-phinf.pstatic.net/main_5192957/51929570145.20241213222119.jpg", "mainIngredients": ["알부틴", "비타민C", "레티놀"], "concerns": ["인공향료"], "skinTypes": ["건성", "노화"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "네이버", "price": 35100, "url": "https://search.shopping.naver.com/catalog/51929570145"}]},
+            {"id": "prod_73", "name": "오휘 더 퍼스트 제너츄어 포맨 올인원 세럼 90ml, 1개", "brand": "오휘", "category": "에센스", "price": 30330, "priceRange": "3-4만원", "rating": 4.9, "reviewCount": 219, "safetyScore": 89, "image": "https://shopping-phinf.pstatic.net/main_5192908/51929089488.20241213204206.jpg", "mainIngredients": ["레티놀", "비타민C", "콜라겐"], "concerns": ["인공향료"], "skinTypes": ["건성", "노화"], "skinConcerns": ["미백", "톤업"], "shops": [{"name": "네이버", "price": 30330, "url": "https://search.shopping.naver.com/catalog/51929089488"}]},
+            {"id": "prod_85", "name": "헤라 옴므 블루 에센스 인 토너 125ml, 1개", "brand": "헤라", "category": "에센스", "price": 29410, "priceRange": "2-3만원", "rating": 4.2, "reviewCount": 522, "safetyScore": 97, "image": "https://shopping-phinf.pstatic.net/main_5698738/56987387056.20250929143255.jpg", "mainIngredients": ["콜라겐", "펩타이드", "알부틴"], "concerns": ["인공향료"], "skinTypes": ["모든피부"], "skinConcerns": ["미백", "톤업"], "shops": [{"name": "네이버", "price": 29410, "url": "https://search.shopping.naver.com/catalog/56987387056"}]},
+            {"id": "prod_78", "name": "남자 에센스 기미 화장품 나이아신아마이드 남성 미백 앰플 화이트닝 모공 세럼 고농축", "brand": "남자", "category": "에센스", "price": 25500, "priceRange": "2-3만원", "rating": 4.9, "reviewCount": 199, "safetyScore": 89, "image": "https://shopping-phinf.pstatic.net/main_8165846/81658467371.20.jpg", "mainIngredients": ["레티놀", "비타민C", "펩타이드"], "concerns": ["인공향료"], "skinTypes": ["복합성"], "skinConcerns": ["미백", "톤업"], "shops": [{"name": "브리올", "price": 25500, "url": "https://smartstore.naver.com/main/products/4113946430"}]},
+            {"id": "prod_28", "name": "헤라 옴므 에센스 인 에멀젼 110ml, 1개", "brand": "헤라", "category": "에센스", "price": 23120, "priceRange": "2-3만원", "rating": 4.7, "reviewCount": 387, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_5192929/51929292217.20241213211517.jpg", "mainIngredients": ["알부틴", "비타민C", "콜라겐"], "concerns": ["인공향료"], "skinTypes": ["건성", "노화"], "skinConcerns": ["미백", "톤업"], "shops": [{"name": "네이버", "price": 23120, "url": "https://search.shopping.naver.com/catalog/51929292217"}]},
+            {"id": "prod_67", "name": "아이오페 맨 바이오 에센스 인텐시브 컨디셔닝 이엑스 145ml, 1개", "brand": "아이오페", "category": "에센스", "price": 22800, "priceRange": "2-3만원", "rating": 4.2, "reviewCount": 322, "safetyScore": 97, "image": "https://shopping-phinf.pstatic.net/main_5192956/51929568973.20241213221418.jpg", "mainIngredients": ["비타민C", "펩타이드", "알부틴"], "concerns": ["인공향료"], "skinTypes": ["모든피부"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "네이버", "price": 22800, "url": "https://search.shopping.naver.com/catalog/51929568973"}]},
+            {"id": "prod_79", "name": "닥터맥스 쿨링포어 남자앰플 50ml 남성모공 피지 주름 진정 미백기능성", "brand": "닥터맥스", "category": "에센스", "price": 22000, "priceRange": "2-3만원", "rating": 4.4, "reviewCount": 264, "safetyScore": 94, "image": "https://shopping-phinf.pstatic.net/main_8986508/89865080288.jpg", "mainIngredients": ["펩타이드", "레티놀", "비타민C"], "concerns": ["파라벤"], "skinTypes": ["건성", "노화"], "skinConcerns": ["안티에이징"], "shops": [{"name": "닥터맥스 거울아거울아", "price": 22000, "url": "https://smartstore.naver.com/main/products/12320569571"}]},
+            {"id": "prod_70", "name": "홀츠포맨 더블이펙트 화이트닝 세럼 100ml, 1개", "brand": "홀츠포맨", "category": "에센스", "price": 20880, "priceRange": "2-3만원", "rating": 4.3, "reviewCount": 353, "safetyScore": 93, "image": "https://shopping-phinf.pstatic.net/main_5192918/51929188473.20241213205156.jpg", "mainIngredients": ["레티놀", "알부틴", "펩타이드"], "concerns": ["인공향료"], "skinTypes": ["모든피부"], "skinConcerns": ["안티에이징"], "shops": [{"name": "네이버", "price": 20880, "url": "https://search.shopping.naver.com/catalog/51929188473"}]},
+            {"id": "prod_74", "name": "프로랑스 포맨 올인원 세럼 300ml, 1개", "brand": "프로랑스", "category": "에센스", "price": 12150, "priceRange": "2만원 이하", "rating": 4.1, "reviewCount": 481, "safetyScore": 91, "image": "https://shopping-phinf.pstatic.net/main_5192935/51929351723.20241213211426.jpg", "mainIngredients": ["콜라겐", "레티놀", "비타민C"], "concerns": ["인공향료"], "skinTypes": ["건성", "노화"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "네이버", "price": 12150, "url": "https://search.shopping.naver.com/catalog/51929351723"}]},
+            {"id": "prod_99", "name": "콜라겐 마스크팩 6종 30매 고농축 앰플 PDRN 팩 남자 여자 시트팩 1일1팩 진정 보습", "brand": "콜라겐", "category": "에센스", "price": 10900, "priceRange": "2만원 이하", "rating": 4.0, "reviewCount": 120, "safetyScore": 85, "image": "https://shopping-phinf.pstatic.net/main_8228824/82288241627.8.jpg", "mainIngredients": ["펩타이드", "알부틴", "콜라겐"], "concerns": ["파라벤"], "skinTypes": ["모든피부"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "에스세이지", "price": 10900, "url": "https://smartstore.naver.com/main/products/4743719914"}]},
+            {"id": "prod_19", "name": "공진향 군 자양 3종 세트 남성 남자 옴므 스킨로션 크림 기초 화장품 선물", "brand": "공진향", "category": "크림", "price": 142000, "priceRange": "4만원 이상", "rating": 4.5, "reviewCount": 185, "safetyScore": 85, "image": "https://shopping-phinf.pstatic.net/main_9048125/90481258026.jpg", "mainIngredients": ["센텔라아시아티카", "세라마이드", "나이아신아마이드"], "concerns": ["인공향료"], "skinTypes": ["모든피부"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "더블유와이제이", "price": 142000, "url": "https://smartstore.naver.com/main/products/12936747016"}]},
+            {"id": "prod_7", "name": "피지오겔 데일리 모이스쳐 테라피 포맨 페이셜 크림 80ml, 2개", "brand": "피지오겔", "category": "크림", "price": 38800, "priceRange": "3-4만원", "rating": 4.5, "reviewCount": 445, "safetyScore": 85, "image": "https://shopping-phinf.pstatic.net/main_5192947/51929479230.20241213220304.jpg", "mainIngredients": ["세라마이드", "히알루론산", "판테놀"], "concerns": ["인공향료"], "skinTypes": ["복합성", "건성"], "skinConcerns": ["모공", "피지"], "shops": [{"name": "네이버", "price": 38800, "url": "https://search.shopping.naver.com/catalog/51929479230"}]},
+            {"id": "prod_24", "name": "LALINE 라린 남자 페이셜크림 90g", "brand": "LALINE", "category": "크림", "price": 38400, "priceRange": "3-4만원", "rating": 4.5, "reviewCount": 445, "safetyScore": 95, "image": "https://shopping-phinf.pstatic.net/main_5843930/58439303549.jpg", "mainIngredients": ["히알루론산", "나이아신아마이드", "센텔라아시아티카"], "concerns": ["인공향료"], "skinTypes": ["건성", "민감성"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "크로켓Croket", "price": 38400, "url": "https://www.croket.co.kr/seller/product/668f70b1d1b048ab752d1a54?yg_type=naver_shopping&yg_method=668f70b1d1b048ab752d1a54&utm_source=naver&utm_medium=shopping&utm_campaign=668f70b1d1b048ab752d1a54&utm_content={keyword}&utm_term={query}"}]},
+            {"id": "prod_95", "name": "올리브영 남자 남성 톤업 선크림", "brand": "올리브영", "category": "크림", "price": 29900, "priceRange": "2-3만원", "rating": 4.9, "reviewCount": 439, "safetyScore": 89, "image": "https://shopping-phinf.pstatic.net/main_8666216/86662163472.jpg", "mainIngredients": ["나이아신아마이드", "센텔라아시아티카", "히알루론산"], "concerns": ["민감성분"], "skinTypes": ["모든피부"], "skinConcerns": ["수분부족", "민감"], "shops": [{"name": "unitshop", "price": 29900, "url": "https://smartstore.naver.com/main/products/9117663149"}]},
+            {"id": "prod_1", "name": "남자 수분 크림 미백 화이트닝 집중 영양 보습 남성 모이스처 화장품 50ml, 1개", "brand": "남자", "category": "크림", "price": 22900, "priceRange": "2-3만원", "rating": 4.6, "reviewCount": 136, "safetyScore": 91, "image": "https://shopping-phinf.pstatic.net/main_1090956/10909569101.14.jpg", "mainIngredients": ["세라마이드", "센텔라아시아티카", "나이아신아마이드"], "concerns": ["인공향료"], "skinTypes": ["건성", "민감성"], "skinConcerns": ["모공", "피지"], "shops": [{"name": "브리올", "price": 22900, "url": "https://smartstore.naver.com/main/products/624457334"}]},
+            {"id": "prod_94", "name": "설화수 본윤선크림 50ml(SPF50+), 1개", "brand": "설화수", "category": "크림", "price": 22280, "priceRange": "2-3만원", "rating": 4.4, "reviewCount": 354, "safetyScore": 89, "image": "https://shopping-phinf.pstatic.net/main_5192950/51929509815.20241213220616.jpg", "mainIngredients": ["센텔라아시아티카", "세라마이드", "히알루론산"], "concerns": ["민감성분"], "skinTypes": ["모든피부"], "skinConcerns": ["모공", "피지"], "shops": [{"name": "네이버", "price": 22280, "url": "https://search.shopping.naver.com/catalog/51929509815"}]},
+            {"id": "prod_10", "name": "닥터헤디슨 디어 옴므 포맨 모이스처 크림 200ml, 1개", "brand": "닥터헤디슨", "category": "크림", "price": 21900, "priceRange": "2-3만원", "rating": 4.7, "reviewCount": 497, "safetyScore": 92, "image": "https://shopping-phinf.pstatic.net/main_5192920/51929205584.20241213210148.jpg", "mainIngredients": ["히알루론산", "판테놀", "세라마이드"], "concerns": ["민감성분"], "skinTypes": ["모든피부"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "네이버", "price": 21900, "url": "https://search.shopping.naver.com/catalog/51929205584"}]},
+            {"id": "prod_91", "name": "설화수 맨 본윤 남자 선크림 썬크림 선물 옴므 올인원 비비 톤업", "brand": "설화수", "category": "크림", "price": 21900, "priceRange": "2-3만원", "rating": 4.1, "reviewCount": 151, "safetyScore": 96, "image": "https://shopping-phinf.pstatic.net/main_8408078/84080782069.6.jpg", "mainIngredients": ["히알루론산", "센텔라아시아티카", "판테놀"], "concerns": ["인공향료"], "skinTypes": ["모든피부"], "skinConcerns": ["모공", "피지"], "shops": [{"name": "파나시아", "price": 21900, "url": "https://smartstore.naver.com/main/products/6536281736"}]},
+            {"id": "prod_22", "name": "피지오겔 데일리 모이스쳐 테라피 포맨 페이셜 크림", "brand": "피지오겔", "category": "크림", "price": 21100, "priceRange": "2-3만원", "rating": 4.0, "reviewCount": 130, "safetyScore": 90, "image": "https://shopping-phinf.pstatic.net/main_5664637/56646374303.8.jpg", "mainIngredients": ["판테놀", "센텔라아시아티카", "나이아신아마이드"], "concerns": ["인공향료"], "skinTypes": ["건성", "민감성"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "쿠팡", "price": 21100, "url": "https://link.coupang.com/re/PCSNAVERPCSDP?pageKey=8673561966&ctag=8673561966&lptag=l020425621263&itemId=12224065360&vendorItemId=88316309227&spec=10305197"}]},
+            {"id": "prod_55", "name": "NESAY 네세이 크림 폼클렌져 포맨 남자폼클렌져", "brand": "NESAY", "category": "크림", "price": 19900, "priceRange": "2만원 이하", "rating": 4.8, "reviewCount": 338, "safetyScore": 88, "image": "https://shopping-phinf.pstatic.net/main_8286503/82865038837.3.jpg", "mainIngredients": ["판테놀", "나이아신아마이드", "센텔라아시아티카"], "concerns": ["민감성분"], "skinTypes": ["건성", "민감성"], "skinConcerns": ["수분부족", "민감"], "shops": [{"name": "에이알앤지투비어레이디쥬시벨", "price": 19900, "url": "https://smartstore.naver.com/main/products/5320546270"}]},
+            {"id": "prod_2", "name": "라운드랩 포 맨 자작나무 수분 크림 75ml, 1개", "brand": "라운드랩", "category": "크림", "price": 19500, "priceRange": "2만원 이하", "rating": 4.1, "reviewCount": 181, "safetyScore": 91, "image": "https://shopping-phinf.pstatic.net/main_5192949/51929497787.20241213220252.jpg", "mainIngredients": ["세라마이드", "히알루론산", "판테놀"], "concerns": ["인공향료"], "skinTypes": ["모든피부"], "skinConcerns": ["모공", "피지"], "shops": [{"name": "네이버", "price": 19500, "url": "https://search.shopping.naver.com/catalog/51929497787"}]},
+            {"id": "prod_18", "name": "라네즈 피부관리 피부보호 옴므 크림스킨 올인원 150ml + 25ml 2개", "brand": "라네즈", "category": "크림", "price": 19110, "priceRange": "2만원 이하", "rating": 4.7, "reviewCount": 477, "safetyScore": 97, "image": "https://shopping-phinf.pstatic.net/main_9045587/90455871349.jpg", "mainIngredients": ["센텔라아시아티카", "나이아신아마이드", "히알루론산"], "concerns": ["민감성분"], "skinTypes": ["모든피부"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "마르쉐리을", "price": 19110, "url": "https://smartstore.naver.com/main/products/12911360356"}]},
+            {"id": "prod_8", "name": "홀츠포맨 안티 링클 화이트닝 모이스처 크림 100ml, 1개", "brand": "홀츠포맨", "category": "크림", "price": 18500, "priceRange": "2만원 이하", "rating": 4.2, "reviewCount": 462, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_5192917/51929175892.20241213204128.jpg", "mainIngredients": ["센텔라아시아티카", "나이아신아마이드", "히알루론산"], "concerns": ["인공향료"], "skinTypes": ["모든피부"], "skinConcerns": ["수분부족", "민감"], "shops": [{"name": "네이버", "price": 18500, "url": "https://search.shopping.naver.com/catalog/51929175892"}]},
+            {"id": "prod_3", "name": "엠도씨 화이트닝 톤 업 크림 50ml, 1개", "brand": "엠도씨", "category": "크림", "price": 18200, "priceRange": "2만원 이하", "rating": 4.9, "reviewCount": 109, "safetyScore": 94, "image": "https://shopping-phinf.pstatic.net/main_5192921/51929218119.20241213205540.jpg", "mainIngredients": ["판테놀", "나이아신아마이드", "히알루론산"], "concerns": ["민감성분"], "skinTypes": ["복합성", "건성"], "skinConcerns": ["수분부족", "민감"], "shops": [{"name": "네이버", "price": 18200, "url": "https://search.shopping.naver.com/catalog/51929218119"}]},
+            {"id": "prod_93", "name": "남자 톤업 선크림 500ml, 1개", "brand": "남자", "category": "크림", "price": 18200, "priceRange": "2만원 이하", "rating": 4.2, "reviewCount": 432, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_5798896/57988967817.20251202101006.jpg", "mainIngredients": ["세라마이드", "나이아신아마이드", "센텔라아시아티카"], "concerns": ["인공향료"], "skinTypes": ["모든피부"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "네이버", "price": 18200, "url": "https://search.shopping.naver.com/catalog/57988967817"}]},
+            {"id": "prod_9", "name": "홀츠포맨 남자 영양 크림 100ml 주름개선 보습 탄력 아빠 50대 남성 화장품 선물", "brand": "홀츠포맨", "category": "크림", "price": 18100, "priceRange": "2만원 이하", "rating": 4.6, "reviewCount": 176, "safetyScore": 96, "image": "https://shopping-phinf.pstatic.net/main_1299699/12996994170.4.jpg", "mainIngredients": ["판테놀", "센텔라아시아티카", "히알루론산"], "concerns": ["인공향료"], "skinTypes": ["건성", "민감성"], "skinConcerns": ["모공", "피지"], "shops": [{"name": "안나홀츠", "price": 18100, "url": "https://smartstore.naver.com/main/products/2365834104"}]},
+            {"id": "prod_4", "name": "미프 미남크림 톤업 화이트닝 남자 남성 미백 보습 수분 영양 탄력 톤업 크림 50ml", "brand": "미프", "category": "크림", "price": 15900, "priceRange": "2만원 이하", "rating": 4.6, "reviewCount": 266, "safetyScore": 96, "image": "https://shopping-phinf.pstatic.net/main_9618427/9618427989.34.jpg", "mainIngredients": ["판테놀", "센텔라아시아티카", "세라마이드"], "concerns": ["인공향료"], "skinTypes": ["복합성", "건성"], "skinConcerns": ["수분부족", "민감"], "shops": [{"name": "미프", "price": 15900, "url": "https://smartstore.naver.com/main/products/379753135"}]},
+            {"id": "prod_5", "name": "미프 미남크림 톤업 화이트닝 50ml, 1개", "brand": "미프", "category": "크림", "price": 15900, "priceRange": "2만원 이하", "rating": 4.3, "reviewCount": 233, "safetyScore": 98, "image": "https://shopping-phinf.pstatic.net/main_5192959/51929594913.20241213221827.jpg", "mainIngredients": ["히알루론산", "판테놀", "세라마이드"], "concerns": ["인공향료"], "skinTypes": ["모든피부"], "skinConcerns": ["수분부족", "민감"], "shops": [{"name": "네이버", "price": 15900, "url": "https://search.shopping.naver.com/catalog/51929594913"}]},
+            {"id": "prod_92", "name": "남자 선크림 백탁없는 데일리 남성 썬크림 자연스러운 화이트닝 선블록 SPF 50+", "brand": "남자", "category": "크림", "price": 14900, "priceRange": "2만원 이하", "rating": 4.6, "reviewCount": 376, "safetyScore": 91, "image": "https://shopping-phinf.pstatic.net/main_8327370/83273706701.16.jpg", "mainIngredients": ["나이아신아마이드", "히알루론산", "판테놀"], "concerns": ["인공향료"], "skinTypes": ["복합성", "건성"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "브리올", "price": 14900, "url": "https://smartstore.naver.com/main/products/5729208029"}]},
+            {"id": "prod_16", "name": "무칸 옴므 내츄럴커버 비비크림 50ml", "brand": "무칸", "category": "크림", "price": 13700, "priceRange": "2만원 이하", "rating": 4.0, "reviewCount": 230, "safetyScore": 90, "image": "https://shopping-phinf.pstatic.net/main_1252108/12521083840.20210504121051.jpg", "mainIngredients": ["세라마이드", "판테놀", "센텔라아시아티카"], "concerns": ["인공향료"], "skinTypes": ["건성", "민감성"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "네이버", "price": 13700, "url": "https://search.shopping.naver.com/catalog/12521083840"}]},
+            {"id": "prod_17", "name": "남성화장품 올인원 snp 타임리스 블랙 옴므 크림 80ml", "brand": "남성화장품", "category": "크림", "price": 10700, "priceRange": "2만원 이하", "rating": 4.4, "reviewCount": 444, "safetyScore": 94, "image": "https://shopping-phinf.pstatic.net/main_9007801/90078015153.jpg", "mainIngredients": ["히알루론산", "판테놀", "세라마이드"], "concerns": ["민감성분"], "skinTypes": ["모든피부"], "skinConcerns": ["주름", "탄력"], "shops": [{"name": "봄의 선물", "price": 10700, "url": "https://smartstore.naver.com/main/products/12533504300"}]},
+            {"id": "prod_20", "name": "올인원 인기 모이스처 아쿠아 2종 4IN1 바찌 수딩젤 에센스 300ML 프리미엄 옴므 크림 올인원", "brand": "올인원", "category": "크림", "price": 10490, "priceRange": "2만원 이하", "rating": 4.1, "reviewCount": 391, "safetyScore": 86, "image": "https://shopping-phinf.pstatic.net/main_9057038/90570380109.jpg", "mainIngredients": ["세라마이드", "판테놀", "센텔라아시아티카"], "concerns": ["인공향료"], "skinTypes": ["복합성", "건성"], "skinConcerns": ["수분부족", "민감"], "shops": [{"name": "핑쇼195", "price": 10490, "url": "https://smartstore.naver.com/main/products/13025869017"}]},
+            {"id": "prod_25", "name": "지아자 MEN 페이셜 크림 SPF6 50 ml", "brand": "지아자", "category": "크림", "price": 4700, "priceRange": "2만원 이하", "rating": 4.3, "reviewCount": 143, "safetyScore": 88, "image": "https://shopping-phinf.pstatic.net/main_8807651/88076514299.jpg", "mainIngredients": ["나이아신아마이드", "히알루론산", "센텔라아시아티카"], "concerns": ["민감성분"], "skinTypes": ["복합성", "건성"], "skinConcerns": ["모공", "피지"], "shops": [{"name": "모두유로", "price": 4700, "url": "https://smartstore.naver.com/main/products/10532008939"}]},
+            {"id": "prod_49", "name": "(1+1) 히이즈 듀얼포어 클렌저 200ml 남성 모공블랙헤드 제거", "brand": "(1+1)", "category": "클렌저", "price": 38800, "priceRange": "3-4만원", "rating": 4.8, "reviewCount": 168, "safetyScore": 93, "image": "https://shopping-phinf.pstatic.net/main_8977665/89776653778.jpg", "mainIngredients": ["티트리오일", "코코넛오일", "AHA"], "concerns": ["SLS"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["각질", "블랙헤드"], "shops": [{"name": "로지스마켓", "price": 38800, "url": "https://smartstore.naver.com/main/products/12232143062"}]},
+            {"id": "prod_46", "name": "비오템 아쿠아 파워 클렌저 125ml, 1개", "brand": "비오템", "category": "클렌저", "price": 36890, "priceRange": "3-4만원", "rating": 4.3, "reviewCount": 313, "safetyScore": 88, "image": "https://shopping-phinf.pstatic.net/main_5192918/51929184592.20241213204915.jpg", "mainIngredients": ["천연계면활성제", "살리실산", "코코넛오일"], "concerns": ["SLES"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["각질", "블랙헤드"], "shops": [{"name": "네이버", "price": 36890, "url": "https://search.shopping.naver.com/catalog/51929184592"}]},
+            {"id": "prod_48", "name": "비오템옴므 1+1 비오템 옴므 아쿠아파워 클렌저 클렌징 폼 125ml", "brand": "비오템옴므", "category": "클렌저", "price": 35700, "priceRange": "3-4만원", "rating": 4.2, "reviewCount": 472, "safetyScore": 92, "image": "https://shopping-phinf.pstatic.net/main_5626164/56261642126.3.jpg", "mainIngredients": ["살리실산", "AHA", "티트리오일"], "concerns": ["SLES"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["여드름", "트러블"], "shops": [{"name": "G마켓", "price": 35700, "url": "https://link.gmarket.co.kr/gate/pcs?item-no=4504352020&sub-id=1003&service-code=10000003&lcd=100000005"}]},
+            {"id": "prod_52", "name": "수라XY 클렌저 포맨 HERBIX™ 추출물", "brand": "수라XY", "category": "클렌저", "price": 28000, "priceRange": "2-3만원", "rating": 4.8, "reviewCount": 188, "safetyScore": 98, "image": "https://shopping-phinf.pstatic.net/main_5754947/57549474873.1.jpg", "mainIngredients": ["AHA", "천연계면활성제", "코코넛오일"], "concerns": ["인공색소"], "skinTypes": ["모든피부"], "skinConcerns": ["여드름", "트러블"], "shops": [{"name": "클레리에", "price": 28000, "url": "https://clairee.kr/product/detail.html?product_no=32&cate_no=43&display_group=1&cafe_mkt=naver_ks&mkt_in=Y&ghost_mall_id=naver&ref=naver_open"}]},
+            {"id": "prod_63", "name": "폴메디슨 옴므 올인원 바디워시 페로몬향, 510ml, 3개", "brand": "폴메디슨", "category": "클렌저", "price": 27700, "priceRange": "2-3만원", "rating": 4.6, "reviewCount": 346, "safetyScore": 96, "image": "https://shopping-phinf.pstatic.net/main_5611635/56116353466.20250805160122.jpg", "mainIngredients": ["천연계면활성제", "살리실산", "코코넛오일"], "concerns": ["인공색소"], "skinTypes": ["민감성", "건성"], "skinConcerns": ["여드름", "트러블"], "shops": [{"name": "네이버", "price": 27700, "url": "https://search.shopping.naver.com/catalog/56116353466"}]},
+            {"id": "prod_64", "name": "[포엘리에] 옴므 올인원 퍼퓸 바디워시 500ml", "brand": "포엘리에", "category": "클렌저", "price": 17500, "priceRange": "2만원 이하", "rating": 4.8, "reviewCount": 538, "safetyScore": 93, "image": "https://shopping-phinf.pstatic.net/main_5581721/55817211648.1.jpg", "mainIngredients": ["코코넛오일", "천연계면활성제", "티트리오일"], "concerns": ["SLES"], "skinTypes": ["민감성", "건성"], "skinConcerns": ["각질", "블랙헤드"], "shops": [{"name": "ABLY", "price": 17500, "url": "https://m.a-bly.com/goods/49859813?utm_source=web_naver-shopping&utm_medium=display&utm_campaign=web_naver-shopping&utm_content=49859813&coupon_sno=48675075"}]},
+            {"id": "prod_65", "name": "애터미 옴므 올인원 워시 500ml", "brand": "애터미", "category": "클렌저", "price": 15540, "priceRange": "2만원 이하", "rating": 4.2, "reviewCount": 512, "safetyScore": 87, "image": "https://shopping-phinf.pstatic.net/main_8721159/87211593481.jpg", "mainIngredients": ["살리실산", "천연계면활성제", "AHA"], "concerns": ["SLS"], "skinTypes": ["민감성", "건성"], "skinConcerns": ["여드름", "트러블"], "shops": [{"name": "H투오마켓", "price": 15540, "url": "https://smartstore.naver.com/main/products/9667091211"}]},
+            {"id": "prod_61", "name": "포엘리에 올인원 옴므 퍼퓸 바디워시 시트러스향, 500ml, 1개", "brand": "포엘리에", "category": "클렌저", "price": 15500, "priceRange": "2만원 이하", "rating": 4.3, "reviewCount": 483, "safetyScore": 93, "image": "https://shopping-phinf.pstatic.net/main_5420958/54209585052.20250415103442.jpg", "mainIngredients": ["살리실산", "코코넛오일", "천연계면활성제"], "concerns": ["SLS"], "skinTypes": ["민감성", "건성"], "skinConcerns": ["여드름", "트러블"], "shops": [{"name": "네이버", "price": 15500, "url": "https://search.shopping.naver.com/catalog/54209585052"}]},
+            {"id": "prod_50", "name": "아이오페 맨 퍼펙트 클린 올 인 원 클렌저 125ml, 1개", "brand": "아이오페", "category": "클렌저", "price": 10470, "priceRange": "2만원 이하", "rating": 4.8, "reviewCount": 388, "safetyScore": 88, "image": "https://shopping-phinf.pstatic.net/main_5192949/51929498201.20241213220942.jpg", "mainIngredients": ["천연계면활성제", "코코넛오일", "티트리오일"], "concerns": ["SLS"], "skinTypes": ["모든피부"], "skinConcerns": ["모공", "피지"], "shops": [{"name": "네이버", "price": 10470, "url": "https://search.shopping.naver.com/catalog/51929498201"}]},
+            {"id": "prod_54", "name": "AHC 온리포맨 폼클렌저 140ml", "brand": "AHC", "category": "클렌저", "price": 9900, "priceRange": "2만원 이하", "rating": 4.0, "reviewCount": 230, "safetyScore": 85, "image": "https://shopping-phinf.pstatic.net/main_1262235/12622355166.29.jpg", "mainIngredients": ["티트리오일", "AHA", "살리실산"], "concerns": ["인공색소"], "skinTypes": ["민감성", "건성"], "skinConcerns": ["각질", "블랙헤드"], "shops": [{"name": "AHC 공식스토어", "price": 9900, "url": "https://smartstore.naver.com/main/products/358553838"}]},
+            {"id": "prod_51", "name": "AHC 온리포맨 폼 클렌저 140ml, 1개", "brand": "AHC", "category": "클렌저", "price": 7760, "priceRange": "2만원 이하", "rating": 4.0, "reviewCount": 250, "safetyScore": 85, "image": "https://shopping-phinf.pstatic.net/main_5192924/51929246651.20241213205531.jpg", "mainIngredients": ["살리실산", "티트리오일", "천연계면활성제"], "concerns": ["SLES"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["각질", "블랙헤드"], "shops": [{"name": "네이버", "price": 7760, "url": "https://search.shopping.naver.com/catalog/51929246651"}]},
+            {"id": "prod_47", "name": "이니스프리 포레스트 포맨 쉐이빙 앤 클렌징 폼 150ml, 1개", "brand": "이니스프리", "category": "클렌저", "price": 3000, "priceRange": "2만원 이하", "rating": 4.3, "reviewCount": 383, "safetyScore": 98, "image": "https://shopping-phinf.pstatic.net/main_5192930/51929307995.20241213211443.jpg", "mainIngredients": ["살리실산", "티트리오일", "천연계면활성제"], "concerns": ["SLS"], "skinTypes": ["지성", "복합성"], "skinConcerns": ["모공", "피지"], "shops": [{"name": "네이버", "price": 3000, "url": "https://search.shopping.naver.com/catalog/51929307995"}]},
+            {"id": "prod_57", "name": "보닌 오일 컨트롤 앤 수딩 폼클렌저 100ml, 1개", "brand": "보닌", "category": "클렌저", "price": 2000, "priceRange": "2만원 이하", "rating": 4.9, "reviewCount": 259, "safetyScore": 89, "image": "https://shopping-phinf.pstatic.net/main_5192947/51929479416.20241213220407.jpg", "mainIngredients": ["코코넛오일", "AHA", "천연계면활성제"], "concerns": ["SLES"], "skinTypes": ["민감성", "건성"], "skinConcerns": ["모공", "피지"], "shops": [{"name": "네이버", "price": 2000, "url": "https://search.shopping.naver.com/catalog/51929479416"}]}
+        ];
+        
+        // ==========================================
+        // 3. 메인 앱 컴포넌트
+        // ==========================================
+        const MobarecciApp = () => {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [previousPage, setPreviousPage] = useState('home');
+            const [selectedProduct, setSelectedProduct] = useState(null);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('전체');
+            const [favorites, setFavorites] = useState([]);
+            const [compareList, setCompareList] = useState([]);
+            
+            // 필터 상태 추가
+            const [selectedPriceRange, setSelectedPriceRange] = useState('전체');
+            const [selectedSkinConcern, setSelectedSkinConcern] = useState('전체');
+            
+            const categories = ['전체', ...new Set(PRODUCTS.map(p => p.category))];
+            const priceRanges = ['2만원 이하', '2-3만원', '3-4만원', '4만원 이상'];
+            // 피부 고민 목록은 주요 키워드로 설정
+            const skinConcernOptions = ['민감', '진정', '수분부족', '모공', '피지', '주름', '탄력', '미백', '블랙헤드', '여드름', '트러블', '각질', '안티에이징'];
+            
+            // 필터링 로직 업데이트
+            const filteredProducts = PRODUCTS.filter(product => {
+                const matchSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                   product.brand.toLowerCase().includes(searchQuery.toLowerCase());
+                const matchCategory = selectedCategory === '전체' || product.category === selectedCategory;
+                
+                // 가격대 필터
+                const matchPrice = selectedPriceRange === '전체' || product.priceRange === selectedPriceRange;
+                
+                // 피부 고민 필터 (배열 안에 포함되어 있는지 확인)
+                const matchSkin = selectedSkinConcern === '전체' || product.skinConcerns.some(c => c.includes(selectedSkinConcern));
+                
+                return matchSearch && matchCategory && matchPrice && matchSkin;
+            });
+            
+            // 네비게이션
+            const navigateTo = (page, product = null) => {
+                setPreviousPage(currentPage);
+                setCurrentPage(page);
+                if (product) setSelectedProduct(product);
+            };
+            
+            const goBack = () => {
+                setCurrentPage(previousPage);
+                setSelectedProduct(null);
+            };
+            
+            // 즐겨찾기 토글
+            const toggleFavorite = (productId) => {
+                setFavorites(prev => 
+                    prev.includes(productId) 
+                        ? prev.filter(id => id !== productId)
+                        : [...prev, productId]
+                );
+            };
+
+            // 비교함 토글 (최대 3개 제한)
+            const toggleCompare = (product) => {
+                setCompareList(prev => {
+                    const exists = prev.find(p => p.id === product.id);
+                    if (exists) {
+                        return prev.filter(p => p.id !== product.id);
+                    } else if (prev.length < 3) {
+                        return [...prev, product];
+                    } else {
+                        alert("비교는 최대 3개까지만 가능합니다.");
+                        return prev;
+                    }
+                });
+            };
+            
+            // ==========================================
+            // 페이지 컴포넌트들
+            // ==========================================
+            const HomePage = () => (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pb-20">
+                    <div className="bg-white shadow-sm sticky top-0 z-10">
+                        <div className="max-w-screen-xl mx-auto px-4 py-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Mobarecci</h1>
+                                <div className="flex gap-2">
+                                    <button onClick={() => navigateTo('compare')} className="p-2 rounded-full hover:bg-gray-100 relative">
+                                        <TrendingUp size={24} className={compareList.length > 0 ? "text-purple-600" : "text-gray-600"} />
+                                        {compareList.length > 0 && (
+                                            <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{compareList.length}</span>
+                                        )}
+                                    </button>
+                                    <button onClick={() => navigateTo('favorites')} className="p-2 rounded-full hover:bg-gray-100 relative">
+                                        <Heart size={24} className={favorites.length > 0 ? "text-red-500 fill-current" : "text-gray-600"} />
+                                        {favorites.length > 0 && (
+                                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{favorites.length}</span>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="relative mb-3">
+                                <Search size={20} className="absolute left-3 top-3 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="제품명, 브랜드 검색..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
+                                />
+                            </div>
+
+                            {/* 필터 영역 추가 */}
+                            <div className="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-1">
+                                <div className="relative shrink-0">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                        <Filter size={14} />
+                                    </div>
+                                    <select 
+                                        value={selectedPriceRange}
+                                        onChange={(e) => setSelectedPriceRange(e.target.value)}
+                                        className="appearance-none pl-8 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 shadow-sm"
+                                    >
+                                        <option value="전체">가격대 전체</option>
+                                        {priceRanges.map(range => (
+                                            <option key={range} value={range}>{range}</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                        <ChevronDown size={14} />
+                                    </div>
+                                </div>
+
+                                <div className="relative shrink-0">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                        <AlertCircle size={14} />
+                                    </div>
+                                    <select 
+                                        value={selectedSkinConcern}
+                                        onChange={(e) => setSelectedSkinConcern(e.target.value)}
+                                        className="appearance-none pl-8 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 shadow-sm"
+                                    >
+                                        <option value="전체">피부고민 전체</option>
+                                        {skinConcernOptions.map(concern => (
+                                            <option key={concern} value={concern}>{concern}</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                        <ChevronDown size={14} />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setSelectedCategory(cat)}
+                                        className={`px-4 py-2 rounded-full whitespace-nowrap transition text-sm font-medium ${selectedCategory === cat ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="max-w-screen-xl mx-auto px-4 py-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {filteredProducts.map(product => (
+                                <div key={product.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 relative">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{product.category}</span>
+                                        <button onClick={() => toggleFavorite(product.id)}>
+                                            <Heart size={20} className={favorites.includes(product.id) ? "text-red-500 fill-current" : "text-gray-400"} />
+                                        </button>
+                                    </div>
+                                    
+                                    <h3 className="font-bold text-lg mb-2 line-clamp-2 h-14">{product.name}</h3>
+                                    <p className="text-gray-600 text-sm mb-3">{product.brand}</p>
+                                    
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="flex items-center gap-1">
+                                            <Star size={16} className="text-yellow-500 fill-current" />
+                                            <span className="font-medium">{product.rating}</span>
+                                        </div>
+                                        <span className="text-gray-400">|</span>
+                                        <span className="text-sm text-gray-600">리뷰 {product.reviewCount}</span>
+                                    </div>
+                                    
+                                    <div className="flex flex-wrap gap-1 mb-3">
+                                        {product.skinConcerns.slice(0, 2).map(c => (
+                                            <span key={c} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{c}</span>
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="text-xl font-bold text-blue-600">{product.price.toLocaleString()}원</div>
+                                        <div className="flex items-center gap-1 px-2 py-1 bg-green-100 rounded">
+                                            <Award size={14} className="text-green-600" />
+                                            <span className="text-sm font-medium text-green-700">{product.safetyScore}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex gap-2">
+                                        <button onClick={() => navigateTo('detail', product)} className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">상세보기</button>
+                                        <button onClick={() => toggleCompare(product)} className={`px-4 py-2 rounded-lg transition ${compareList.find(p => p.id === product.id) ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>비교</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        {filteredProducts.length === 0 && (
+                            <div className="text-center py-20">
+                                <AlertCircle size={48} className="mx-auto text-gray-400 mb-4" />
+                                <p className="text-gray-600 font-medium">검색 결과가 없습니다</p>
+                                <p className="text-gray-500 text-sm mt-2">필터를 변경해보세요</p>
+                                <button 
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setSelectedCategory('전체');
+                                        setSelectedPriceRange('전체');
+                                        setSelectedSkinConcern('전체');
+                                    }}
+                                    className="mt-4 text-blue-600 underline text-sm"
+                                >
+                                    필터 초기화
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+            
+            const DetailPage = () => {
+                if (!selectedProduct) return null;
+                return (
+                    <div className="min-h-screen bg-gray-50 pb-20">
+                        <div className="bg-white shadow-sm sticky top-0 z-10">
+                            <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
+                                <button onClick={goBack} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
+                                <h1 className="text-xl font-bold">제품 상세</h1>
+                            </div>
+                        </div>
+                        <div className="max-w-screen-xl mx-auto px-4 py-6">
+                            <div className="bg-white rounded-xl shadow-sm p-6 mb-4">
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex-1">
+                                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{selectedProduct.category}</span>
+                                        <h2 className="text-2xl font-bold mt-3 mb-2">{selectedProduct.name}</h2>
+                                        <p className="text-gray-600 text-lg">{selectedProduct.brand}</p>
+                                    </div>
+                                    <button onClick={() => toggleFavorite(selectedProduct.id)}>
+                                        <Heart size={28} className={favorites.includes(selectedProduct.id) ? "text-red-500 fill-current" : "text-gray-400"} />
+                                    </button>
+                                </div>
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="flex items-center gap-2"><Star size={20} className="text-yellow-500 fill-current" /><span className="text-xl font-bold">{selectedProduct.rating}</span></div>
+                                    <span className="text-gray-400">|</span>
+                                    <span className="text-gray-600">리뷰 {selectedProduct.reviewCount}개</span>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="p-4 bg-blue-50 rounded-lg">
+                                        <h3 className="font-bold text-sm text-blue-800 mb-2">피부 고민 해결</h3>
+                                        <div className="flex flex-wrap gap-1">
+                                            {selectedProduct.skinConcerns.map(c => (
+                                                <span key={c} className="text-xs bg-white text-blue-600 px-2 py-1 rounded border border-blue-100">{c}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-green-50 rounded-lg">
+                                        <h3 className="font-bold text-sm text-green-800 mb-2">성분 안전도</h3>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl font-bold text-green-600">{selectedProduct.safetyScore}</span>
+                                            <span className="text-xs text-green-700">/ 100점</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                                    <h3 className="font-bold mb-2">주요 성분</h3>
+                                    <p className="text-sm text-gray-700">{selectedProduct.mainIngredients.join(', ')}</p>
+                                </div>
+                                <div className="bg-white rounded-xl">
+                                    <div className="text-3xl font-bold text-blue-600 mb-4">{selectedProduct.price.toLocaleString()}원</div>
+                                    <a href={selectedProduct.shops[0].url} target="_blank" rel="noopener noreferrer" className="block w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition text-center font-medium">{selectedProduct.shops[0].name}에서 구매하기</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+            
+            const FavoritesPage = () => {
+                const favoriteProducts = PRODUCTS.filter(p => favorites.includes(p.id));
+                return (
+                    <div className="min-h-screen bg-gray-50 pb-20">
+                        <div className="bg-white shadow-sm sticky top-0 z-10">
+                            <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
+                                <button onClick={goBack} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
+                                <h1 className="text-xl font-bold">즐겨찾기 ({favoriteProducts.length})</h1>
+                            </div>
+                        </div>
+                        <div className="max-w-screen-xl mx-auto px-4 py-6">
+                            {favoriteProducts.length === 0 ? (
+                                <div className="text-center py-20">
+                                    <Heart size={48} className="mx-auto text-gray-400 mb-4" />
+                                    <p className="text-gray-600">즐겨찾기한 제품이 없습니다</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {favoriteProducts.map(product => (
+                                        <div key={product.id} className="bg-white rounded-xl shadow-sm p-4">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">{product.category}</span>
+                                                <button onClick={() => toggleFavorite(product.id)}><Heart size={20} className="text-red-500 fill-current" /></button>
+                                            </div>
+                                            <h3 className="font-bold mb-2 line-clamp-2 h-12">{product.name}</h3>
+                                            <p className="text-gray-600 text-sm mb-3">{product.brand}</p>
+                                            <div className="text-xl font-bold text-blue-600 mb-3">{product.price.toLocaleString()}원</div>
+                                            <button onClick={() => navigateTo('detail', product)} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">상세보기</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            const ComparePage = () => {
+                return (
+                    <div className="min-h-screen bg-gray-50 pb-20">
+                        <div className="bg-white shadow-sm sticky top-0 z-10">
+                            <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
+                                <button onClick={goBack} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
+                                <h1 className="text-xl font-bold">제품 비교 ({compareList.length}/3)</h1>
+                                <button onClick={() => setCompareList([])} className="ml-auto text-sm text-gray-500 underline">전체 삭제</button>
+                            </div>
+                        </div>
+
+                        <div className="max-w-screen-xl mx-auto px-4 py-6 overflow-x-auto">
+                            {compareList.length === 0 ? (
+                                <div className="text-center py-20">
+                                    <TrendingUp size={48} className="mx-auto text-gray-400 mb-4" />
+                                    <p className="text-gray-600">비교할 제품을 담아주세요 (최대 3개)</p>
+                                    <button onClick={() => setCurrentPage('home')} className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">제품 보러가기</button>
+                                </div>
+                            ) : (
+                                <div className="flex gap-4 min-w-max pb-4">
+                                    {/* 라벨 컬럼 */}
+                                    <div className="flex flex-col gap-4 pt-32 font-bold text-gray-600 w-24 shrink-0 text-sm">
+                                        <div className="h-10 flex items-center">가격</div>
+                                        <div className="h-10 flex items-center">평점</div>
+                                        <div className="h-10 flex items-center">안전도</div>
+                                        <div className="h-20 flex items-center">주요 성분</div>
+                                        <div className="h-10 flex items-center">피부 타입</div>
+                                        <div className="h-10 flex items-center">효과</div>
+                                    </div>
+                                    
+                                    {/* 제품 컬럼들 */}
+                                    {compareList.map(product => (
+                                        <div key={product.id} className="w-56 bg-white rounded-xl shadow-sm p-4 shrink-0 relative">
+                                            <button onClick={() => toggleCompare(product)} className="absolute top-2 right-2 p-1 bg-gray-100 rounded-full hover:bg-gray-200"><X size={16} /></button>
+                                            <div className="h-32 mb-2 flex items-center justify-center bg-gray-50 rounded-lg">
+                                                <img src={product.image} alt={product.name} className="max-h-full max-w-full object-contain" />
+                                            </div>
+                                            <h3 className="font-bold text-sm line-clamp-2 h-10 mb-6 text-center">{product.name}</h3>
+                                            
+                                            <div className="flex flex-col gap-4 text-sm">
+                                                <div className="h-10 flex items-center text-blue-600 font-bold text-lg">{product.price.toLocaleString()}원</div>
+                                                <div className="h-10 flex items-center">
+                                                    <Star size={16} className="text-yellow-500 fill-current mr-1" />
+                                                    {product.rating} <span className="text-xs text-gray-400 ml-1">({product.reviewCount})</span>
+                                                </div>
+                                                <div className="h-10 flex items-center">
+                                                    <span className={`px-2 py-1 rounded text-xs font-bold ${product.safetyScore >= 90 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                                        {product.safetyScore}점
+                                                    </span>
+                                                </div>
+                                                <div className="h-20 text-xs text-gray-600 overflow-y-auto leading-relaxed border-t border-b py-1">
+                                                    {product.mainIngredients.join(', ')}
+                                                </div>
+                                                <div className="h-10 flex flex-wrap gap-1 content-center">
+                                                    {product.skinTypes.map(type => (
+                                                        <span key={type} className="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-600">{type}</span>
+                                                    ))}
+                                                </div>
+                                                <div className="h-10 flex flex-wrap gap-1 content-center">
+                                                    {product.skinConcerns.map(c => (
+                                                        <span key={c} className="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded">{c}</span>
+                                                    ))}
+                                                </div>
+                                                
+                                                <button onClick={() => navigateTo('detail', product)} className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm mt-2 hover:bg-blue-700">상세보기</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+            
+            return (
+                <div className="relative">
+                    {currentPage === 'home' && <HomePage />}
+                    {currentPage === 'detail' && <DetailPage />}
+                    {currentPage === 'favorites' && <FavoritesPage />}
+                    {currentPage === 'compare' && <ComparePage />}
+                    
+                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
+                        <div className="max-w-screen-xl mx-auto px-4 py-2">
+                            <div className="grid grid-cols-3 gap-2">
+                                <button onClick={() => setCurrentPage('home')} className={`flex flex-col items-center py-2 rounded-lg transition ${currentPage === 'home' ? 'text-blue-600 bg-blue-50' : 'text-gray-600'}`}>
+                                    <ShoppingCart size={24} />
+                                    <span className="text-xs mt-1">홈</span>
+                                </button>
+                                <button onClick={() => navigateTo('favorites')} className={`flex flex-col items-center py-2 rounded-lg transition relative ${currentPage === 'favorites' ? 'text-blue-600 bg-blue-50' : 'text-gray-600'}`}>
+                                    <Heart size={24} />
+                                    <span className="text-xs mt-1">즐겨찾기</span>
+                                    {favorites.length > 0 && <span className="absolute top-0 right-6 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{favorites.length}</span>}
+                                </button>
+                                <button onClick={() => navigateTo('compare')} className={`flex flex-col items-center py-2 rounded-lg transition relative ${currentPage === 'compare' ? 'text-blue-600 bg-blue-50' : 'text-gray-600'}`}>
+                                    <TrendingUp size={24} />
+                                    <span className="text-xs mt-1">비교</span>
+                                    {compareList.length > 0 && <span className="absolute top-0 right-6 bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{compareList.length}</span>}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        ReactDOM.render(<MobarecciApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
