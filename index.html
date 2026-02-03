@@ -26,9 +26,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
         
-        // ==========================================
-        // 1. 아이콘 컴포넌트 (Lucide React)
-        // ==========================================
+        // 아이콘 컴포넌트
         const Search = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>);
         const Heart = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>);
         const Star = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>);
@@ -39,10 +37,9 @@
         const TrendingUp = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>);
         const Filter = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>);
         const ChevronDown = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>);
+        const ImageOff = ({ size = 24, className = "" }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="1" y1="1" x2="23" y2="23"></line><path d="M21 21l-4.486-4.494"></path><path d="M19 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.343"></path><path d="M15 15l-1.354-1.354"></path><path d="M9 9l2.5-2.5 1.5 1.5"></path><path d="M13 13l2.5-2.5 1.75 1.75"></path><circle cx="9" cy="9" r="2"></circle></svg>);
 
-        // ==========================================
-        // 2. 통합 데이터 (80개 제품)
-        // ==========================================
+        // 데이터
         const PRODUCTS = [
             {"id": "prod_62", "name": "[백화점/선물포장] 샤넬 알뤼르 옴므 스포츠 샤워 젤 200ml", "brand": "백화점/선물포장", "category": "기타", "price": 90000, "priceRange": "4만원 이상", "rating": 4.1, "reviewCount": 251, "safetyScore": 96, "image": "https://shopping-phinf.pstatic.net/main_8896607/88966071460.2.jpg", "mainIngredients": ["히알루론산", "판테놀", "세라마이드"], "concerns": ["향료"], "skinTypes": ["모든피부"], "skinConcerns": ["보습"], "shops": [{"name": "바이헌 코스메틱", "price": 90000, "url": "https://smartstore.naver.com/main/products/11421561095"}]},
             {"id": "prod_40", "name": "비오템 옴므 아쿠아 파워 어드밴스드 젤 100ml, 1개", "brand": "비오템", "category": "기타", "price": 57900, "priceRange": "4만원 이상", "rating": 4.8, "reviewCount": 318, "safetyScore": 88, "image": "https://shopping-phinf.pstatic.net/main_5192921/51929217882.20241213205201.jpg", "mainIngredients": ["알란토인", "히알루론산", "비타민E"], "concerns": ["향료"], "skinTypes": ["모든피부"], "skinConcerns": ["민감", "진정"], "shops": [{"name": "네이버", "price": 57900, "url": "https://search.shopping.naver.com/catalog/51929217882"}]},
@@ -127,81 +124,25 @@
         ];
         
         // ==========================================
-        // 3. 메인 앱 컴포넌트
+        // 컴포넌트 분리 (버그 수정: App 외부로 이동)
         // ==========================================
-        const MobarecciApp = () => {
-            const [currentPage, setCurrentPage] = useState('home');
-            const [previousPage, setPreviousPage] = useState('home');
-            const [selectedProduct, setSelectedProduct] = useState(null);
-            const [searchQuery, setSearchQuery] = useState('');
-            const [selectedCategory, setSelectedCategory] = useState('전체');
-            const [favorites, setFavorites] = useState([]);
-            const [compareList, setCompareList] = useState([]);
-            
-            // 필터 상태 추가
-            const [selectedPriceRange, setSelectedPriceRange] = useState('전체');
-            const [selectedSkinConcern, setSelectedSkinConcern] = useState('전체');
-            
-            const categories = ['전체', ...new Set(PRODUCTS.map(p => p.category))];
-            const priceRanges = ['2만원 이하', '2-3만원', '3-4만원', '4만원 이상'];
-            // 피부 고민 목록은 주요 키워드로 설정
-            const skinConcernOptions = ['민감', '진정', '수분부족', '모공', '피지', '주름', '탄력', '미백', '블랙헤드', '여드름', '트러블', '각질', '안티에이징'];
-            
-            // 필터링 로직 업데이트
-            const filteredProducts = PRODUCTS.filter(product => {
-                const matchSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                   product.brand.toLowerCase().includes(searchQuery.toLowerCase());
-                const matchCategory = selectedCategory === '전체' || product.category === selectedCategory;
-                
-                // 가격대 필터
-                const matchPrice = selectedPriceRange === '전체' || product.priceRange === selectedPriceRange;
-                
-                // 피부 고민 필터 (배열 안에 포함되어 있는지 확인)
-                const matchSkin = selectedSkinConcern === '전체' || product.skinConcerns.some(c => c.includes(selectedSkinConcern));
-                
-                return matchSearch && matchCategory && matchPrice && matchSkin;
-            });
-            
-            // 네비게이션
-            const navigateTo = (page, product = null) => {
-                setPreviousPage(currentPage);
-                setCurrentPage(page);
-                if (product) setSelectedProduct(product);
-            };
-            
-            const goBack = () => {
-                setCurrentPage(previousPage);
-                setSelectedProduct(null);
-            };
-            
-            // 즐겨찾기 토글
-            const toggleFavorite = (productId) => {
-                setFavorites(prev => 
-                    prev.includes(productId) 
-                        ? prev.filter(id => id !== productId)
-                        : [...prev, productId]
-                );
+        
+        const HomePage = ({ 
+            searchQuery, setSearchQuery, 
+            selectedCategory, setSelectedCategory, 
+            selectedPriceRange, setSelectedPriceRange,
+            selectedSkinConcern, setSelectedSkinConcern,
+            filteredProducts, 
+            favorites, toggleFavorite, 
+            compareList, toggleCompare, 
+            navigateTo,
+            categories, priceRanges, skinConcernOptions
+        }) => {
+            const handleImageError = (e) => {
+                e.target.src = "https://via.placeholder.com/300x300/f3f4f6/9ca3af?text=No+Image";
             };
 
-            // 비교함 토글 (최대 3개 제한)
-            const toggleCompare = (product) => {
-                setCompareList(prev => {
-                    const exists = prev.find(p => p.id === product.id);
-                    if (exists) {
-                        return prev.filter(p => p.id !== product.id);
-                    } else if (prev.length < 3) {
-                        return [...prev, product];
-                    } else {
-                        alert("비교는 최대 3개까지만 가능합니다.");
-                        return prev;
-                    }
-                });
-            };
-            
-            // ==========================================
-            // 페이지 컴포넌트들
-            // ==========================================
-            const HomePage = () => (
+            return (
                 <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pb-20">
                     <div className="bg-white shadow-sm sticky top-0 z-10">
                         <div className="max-w-screen-xl mx-auto px-4 py-4">
@@ -234,7 +175,6 @@
                                 />
                             </div>
 
-                            {/* 필터 영역 추가 */}
                             <div className="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-1">
                                 <div className="relative shrink-0">
                                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
@@ -337,7 +277,6 @@
                             <div className="text-center py-20">
                                 <AlertCircle size={48} className="mx-auto text-gray-400 mb-4" />
                                 <p className="text-gray-600 font-medium">검색 결과가 없습니다</p>
-                                <p className="text-gray-500 text-sm mt-2">필터를 변경해보세요</p>
                                 <button 
                                     onClick={() => {
                                         setSearchQuery('');
@@ -354,185 +293,307 @@
                     </div>
                 </div>
             );
-            
-            const DetailPage = () => {
-                if (!selectedProduct) return null;
-                return (
-                    <div className="min-h-screen bg-gray-50 pb-20">
-                        <div className="bg-white shadow-sm sticky top-0 z-10">
-                            <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
-                                <button onClick={goBack} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
-                                <h1 className="text-xl font-bold">제품 상세</h1>
+        };
+
+        const DetailPage = ({ selectedProduct, goBack, favorites, toggleFavorite }) => {
+            if (!selectedProduct) return null;
+            const handleImageError = (e) => {
+                e.target.src = "https://via.placeholder.com/300x300/f3f4f6/9ca3af?text=No+Image";
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 pb-20">
+                    <div className="bg-white shadow-sm sticky top-0 z-10">
+                        <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
+                            <button onClick={goBack} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
+                            <h1 className="text-xl font-bold">제품 상세</h1>
+                        </div>
+                    </div>
+                    <div className="max-w-screen-xl mx-auto px-4 py-6">
+                        <div className="bg-white rounded-xl shadow-sm p-6 mb-4">
+                            <div className="flex justify-center mb-6">
+                                <img 
+                                    src={selectedProduct.image} 
+                                    alt={selectedProduct.name} 
+                                    className="max-h-64 object-contain"
+                                    onError={handleImageError}
+                                />
+                            </div>
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="flex-1">
+                                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{selectedProduct.category}</span>
+                                    <h2 className="text-2xl font-bold mt-3 mb-2">{selectedProduct.name}</h2>
+                                    <p className="text-gray-600 text-lg">{selectedProduct.brand}</p>
+                                </div>
+                                <button onClick={() => toggleFavorite(selectedProduct.id)}>
+                                    <Heart size={28} className={favorites.includes(selectedProduct.id) ? "text-red-500 fill-current" : "text-gray-400"} />
+                                </button>
+                            </div>
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="flex items-center gap-2"><Star size={20} className="text-yellow-500 fill-current" /><span className="text-xl font-bold">{selectedProduct.rating}</span></div>
+                                <span className="text-gray-400">|</span>
+                                <span className="text-gray-600">리뷰 {selectedProduct.reviewCount}개</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="p-4 bg-blue-50 rounded-lg">
+                                    <h3 className="font-bold text-sm text-blue-800 mb-2">피부 고민 해결</h3>
+                                    <div className="flex flex-wrap gap-1">
+                                        {selectedProduct.skinConcerns.map(c => (
+                                            <span key={c} className="text-xs bg-white text-blue-600 px-2 py-1 rounded border border-blue-100">{c}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="p-4 bg-green-50 rounded-lg">
+                                    <h3 className="font-bold text-sm text-green-800 mb-2">성분 안전도</h3>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-2xl font-bold text-green-600">{selectedProduct.safetyScore}</span>
+                                        <span className="text-xs text-green-700">/ 100점</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                                <h3 className="font-bold mb-2">주요 성분</h3>
+                                <p className="text-sm text-gray-700">{selectedProduct.mainIngredients.join(', ')}</p>
+                            </div>
+                            <div className="bg-white rounded-xl">
+                                <div className="text-3xl font-bold text-blue-600 mb-4">{selectedProduct.price.toLocaleString()}원</div>
+                                <a href={selectedProduct.shops[0].url} target="_blank" rel="noopener noreferrer" className="block w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition text-center font-medium">{selectedProduct.shops[0].name}에서 구매하기</a>
                             </div>
                         </div>
-                        <div className="max-w-screen-xl mx-auto px-4 py-6">
-                            <div className="bg-white rounded-xl shadow-sm p-6 mb-4">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex-1">
-                                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{selectedProduct.category}</span>
-                                        <h2 className="text-2xl font-bold mt-3 mb-2">{selectedProduct.name}</h2>
-                                        <p className="text-gray-600 text-lg">{selectedProduct.brand}</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const FavoritesPage = ({ favorites, toggleFavorite, navigateTo, goBack }) => {
+            const favoriteProducts = PRODUCTS.filter(p => favorites.includes(p.id));
+            return (
+                <div className="min-h-screen bg-gray-50 pb-20">
+                    <div className="bg-white shadow-sm sticky top-0 z-10">
+                        <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
+                            <button onClick={goBack} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
+                            <h1 className="text-xl font-bold">즐겨찾기 ({favoriteProducts.length})</h1>
+                        </div>
+                    </div>
+                    <div className="max-w-screen-xl mx-auto px-4 py-6">
+                        {favoriteProducts.length === 0 ? (
+                            <div className="text-center py-20">
+                                <Heart size={48} className="mx-auto text-gray-400 mb-4" />
+                                <p className="text-gray-600">즐겨찾기한 제품이 없습니다</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {favoriteProducts.map(product => (
+                                    <div key={product.id} className="bg-white rounded-xl shadow-sm p-4">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">{product.category}</span>
+                                            <button onClick={() => toggleFavorite(product.id)}><Heart size={20} className="text-red-500 fill-current" /></button>
+                                        </div>
+                                        <h3 className="font-bold mb-2 line-clamp-2 h-12">{product.name}</h3>
+                                        <p className="text-gray-600 text-sm mb-3">{product.brand}</p>
+                                        <div className="text-xl font-bold text-blue-600 mb-3">{product.price.toLocaleString()}원</div>
+                                        <button onClick={() => navigateTo('detail', product)} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">상세보기</button>
                                     </div>
-                                    <button onClick={() => toggleFavorite(selectedProduct.id)}>
-                                        <Heart size={28} className={favorites.includes(selectedProduct.id) ? "text-red-500 fill-current" : "text-gray-400"} />
-                                    </button>
-                                </div>
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="flex items-center gap-2"><Star size={20} className="text-yellow-500 fill-current" /><span className="text-xl font-bold">{selectedProduct.rating}</span></div>
-                                    <span className="text-gray-400">|</span>
-                                    <span className="text-gray-600">리뷰 {selectedProduct.reviewCount}개</span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ComparePage = ({ compareList, setCompareList, toggleCompare, navigateTo, goBack, setCurrentPage }) => {
+            const handleImageError = (e) => {
+                e.target.src = "https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=No+Image";
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 pb-20">
+                    <div className="bg-white shadow-sm sticky top-0 z-10">
+                        <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
+                            <button onClick={goBack} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
+                            <h1 className="text-xl font-bold">제품 비교 ({compareList.length}/3)</h1>
+                            <button onClick={() => setCompareList([])} className="ml-auto text-sm text-gray-500 underline">전체 삭제</button>
+                        </div>
+                    </div>
+
+                    <div className="max-w-screen-xl mx-auto px-4 py-6 overflow-x-auto">
+                        {compareList.length === 0 ? (
+                            <div className="text-center py-20">
+                                <TrendingUp size={48} className="mx-auto text-gray-400 mb-4" />
+                                <p className="text-gray-600">비교할 제품을 담아주세요 (최대 3개)</p>
+                                <button onClick={() => setCurrentPage('home')} className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">제품 보러가기</button>
+                            </div>
+                        ) : (
+                            <div className="flex gap-4 min-w-max pb-4">
+                                <div className="flex flex-col gap-4 pt-32 font-bold text-gray-600 w-24 shrink-0 text-sm">
+                                    <div className="h-10 flex items-center">가격</div>
+                                    <div className="h-10 flex items-center">평점</div>
+                                    <div className="h-10 flex items-center">안전도</div>
+                                    <div className="h-20 flex items-center">주요 성분</div>
+                                    <div className="h-10 flex items-center">피부 타입</div>
+                                    <div className="h-10 flex items-center">효과</div>
                                 </div>
                                 
-                                <div className="grid grid-cols-2 gap-4 mb-6">
-                                    <div className="p-4 bg-blue-50 rounded-lg">
-                                        <h3 className="font-bold text-sm text-blue-800 mb-2">피부 고민 해결</h3>
-                                        <div className="flex flex-wrap gap-1">
-                                            {selectedProduct.skinConcerns.map(c => (
-                                                <span key={c} className="text-xs bg-white text-blue-600 px-2 py-1 rounded border border-blue-100">{c}</span>
-                                            ))}
+                                {compareList.map(product => (
+                                    <div key={product.id} className="w-56 bg-white rounded-xl shadow-sm p-4 shrink-0 relative">
+                                        <button onClick={() => toggleCompare(product)} className="absolute top-2 right-2 p-1 bg-gray-100 rounded-full hover:bg-gray-200"><X size={16} /></button>
+                                        <div className="h-32 mb-2 flex items-center justify-center bg-gray-50 rounded-lg">
+                                            <img 
+                                                src={product.image} 
+                                                alt={product.name} 
+                                                className="max-h-full max-w-full object-contain"
+                                                onError={handleImageError}
+                                            />
+                                        </div>
+                                        <h3 className="font-bold text-sm line-clamp-2 h-10 mb-6 text-center">{product.name}</h3>
+                                        
+                                        <div className="flex flex-col gap-4 text-sm">
+                                            <div className="h-10 flex items-center text-blue-600 font-bold text-lg">{product.price.toLocaleString()}원</div>
+                                            <div className="h-10 flex items-center">
+                                                <Star size={16} className="text-yellow-500 fill-current mr-1" />
+                                                {product.rating} <span className="text-xs text-gray-400 ml-1">({product.reviewCount})</span>
+                                            </div>
+                                            <div className="h-10 flex items-center">
+                                                <span className={`px-2 py-1 rounded text-xs font-bold ${product.safetyScore >= 90 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                                    {product.safetyScore}점
+                                                </span>
+                                            </div>
+                                            <div className="h-20 text-xs text-gray-600 overflow-y-auto leading-relaxed border-t border-b py-1">
+                                                {product.mainIngredients.join(', ')}
+                                            </div>
+                                            <div className="h-10 flex flex-wrap gap-1 content-center">
+                                                {product.skinTypes.map(type => (
+                                                    <span key={type} className="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-600">{type}</span>
+                                                ))}
+                                            </div>
+                                            <div className="h-10 flex flex-wrap gap-1 content-center">
+                                                {product.skinConcerns.map(c => (
+                                                    <span key={c} className="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded">{c}</span>
+                                                ))}
+                                            </div>
+                                            
+                                            <button onClick={() => navigateTo('detail', product)} className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm mt-2 hover:bg-blue-700">상세보기</button>
                                         </div>
                                     </div>
-                                    <div className="p-4 bg-green-50 rounded-lg">
-                                        <h3 className="font-bold text-sm text-green-800 mb-2">성분 안전도</h3>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-2xl font-bold text-green-600">{selectedProduct.safetyScore}</span>
-                                            <span className="text-xs text-green-700">/ 100점</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                                    <h3 className="font-bold mb-2">주요 성분</h3>
-                                    <p className="text-sm text-gray-700">{selectedProduct.mainIngredients.join(', ')}</p>
-                                </div>
-                                <div className="bg-white rounded-xl">
-                                    <div className="text-3xl font-bold text-blue-600 mb-4">{selectedProduct.price.toLocaleString()}원</div>
-                                    <a href={selectedProduct.shops[0].url} target="_blank" rel="noopener noreferrer" className="block w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition text-center font-medium">{selectedProduct.shops[0].name}에서 구매하기</a>
-                                </div>
+                                ))}
                             </div>
-                        </div>
+                        )}
                     </div>
-                );
+                </div>
+            );
+        };
+
+        const MobarecciApp = () => {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [previousPage, setPreviousPage] = useState('home');
+            const [selectedProduct, setSelectedProduct] = useState(null);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('전체');
+            const [favorites, setFavorites] = useState([]);
+            const [compareList, setCompareList] = useState([]);
+            
+            // 필터 상태
+            const [selectedPriceRange, setSelectedPriceRange] = useState('전체');
+            const [selectedSkinConcern, setSelectedSkinConcern] = useState('전체');
+            
+            const categories = ['전체', ...new Set(PRODUCTS.map(p => p.category))];
+            const priceRanges = ['2만원 이하', '2-3만원', '3-4만원', '4만원 이상'];
+            const skinConcernOptions = ['민감', '진정', '수분부족', '모공', '피지', '주름', '탄력', '미백', '블랙헤드', '여드름', '트러블', '각질', '안티에이징'];
+            
+            const filteredProducts = PRODUCTS.filter(product => {
+                const matchSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                   product.brand.toLowerCase().includes(searchQuery.toLowerCase());
+                const matchCategory = selectedCategory === '전체' || product.category === selectedCategory;
+                const matchPrice = selectedPriceRange === '전체' || product.priceRange === selectedPriceRange;
+                const matchSkin = selectedSkinConcern === '전체' || product.skinConcerns.some(c => c.includes(selectedSkinConcern));
+                return matchSearch && matchCategory && matchPrice && matchSkin;
+            });
+            
+            const navigateTo = (page, product = null) => {
+                setPreviousPage(currentPage);
+                setCurrentPage(page);
+                if (product) setSelectedProduct(product);
             };
             
-            const FavoritesPage = () => {
-                const favoriteProducts = PRODUCTS.filter(p => favorites.includes(p.id));
-                return (
-                    <div className="min-h-screen bg-gray-50 pb-20">
-                        <div className="bg-white shadow-sm sticky top-0 z-10">
-                            <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
-                                <button onClick={goBack} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
-                                <h1 className="text-xl font-bold">즐겨찾기 ({favoriteProducts.length})</h1>
-                            </div>
-                        </div>
-                        <div className="max-w-screen-xl mx-auto px-4 py-6">
-                            {favoriteProducts.length === 0 ? (
-                                <div className="text-center py-20">
-                                    <Heart size={48} className="mx-auto text-gray-400 mb-4" />
-                                    <p className="text-gray-600">즐겨찾기한 제품이 없습니다</p>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {favoriteProducts.map(product => (
-                                        <div key={product.id} className="bg-white rounded-xl shadow-sm p-4">
-                                            <div className="flex justify-between items-start mb-3">
-                                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">{product.category}</span>
-                                                <button onClick={() => toggleFavorite(product.id)}><Heart size={20} className="text-red-500 fill-current" /></button>
-                                            </div>
-                                            <h3 className="font-bold mb-2 line-clamp-2 h-12">{product.name}</h3>
-                                            <p className="text-gray-600 text-sm mb-3">{product.brand}</p>
-                                            <div className="text-xl font-bold text-blue-600 mb-3">{product.price.toLocaleString()}원</div>
-                                            <button onClick={() => navigateTo('detail', product)} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">상세보기</button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
+            const goBack = () => {
+                setCurrentPage(previousPage);
+                setSelectedProduct(null);
+            };
+            
+            const toggleFavorite = (productId) => {
+                setFavorites(prev => 
+                    prev.includes(productId) 
+                        ? prev.filter(id => id !== productId)
+                        : [...prev, productId]
                 );
             };
 
-            const ComparePage = () => {
-                return (
-                    <div className="min-h-screen bg-gray-50 pb-20">
-                        <div className="bg-white shadow-sm sticky top-0 z-10">
-                            <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
-                                <button onClick={goBack} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
-                                <h1 className="text-xl font-bold">제품 비교 ({compareList.length}/3)</h1>
-                                <button onClick={() => setCompareList([])} className="ml-auto text-sm text-gray-500 underline">전체 삭제</button>
-                            </div>
-                        </div>
-
-                        <div className="max-w-screen-xl mx-auto px-4 py-6 overflow-x-auto">
-                            {compareList.length === 0 ? (
-                                <div className="text-center py-20">
-                                    <TrendingUp size={48} className="mx-auto text-gray-400 mb-4" />
-                                    <p className="text-gray-600">비교할 제품을 담아주세요 (최대 3개)</p>
-                                    <button onClick={() => setCurrentPage('home')} className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">제품 보러가기</button>
-                                </div>
-                            ) : (
-                                <div className="flex gap-4 min-w-max pb-4">
-                                    {/* 라벨 컬럼 */}
-                                    <div className="flex flex-col gap-4 pt-32 font-bold text-gray-600 w-24 shrink-0 text-sm">
-                                        <div className="h-10 flex items-center">가격</div>
-                                        <div className="h-10 flex items-center">평점</div>
-                                        <div className="h-10 flex items-center">안전도</div>
-                                        <div className="h-20 flex items-center">주요 성분</div>
-                                        <div className="h-10 flex items-center">피부 타입</div>
-                                        <div className="h-10 flex items-center">효과</div>
-                                    </div>
-                                    
-                                    {/* 제품 컬럼들 */}
-                                    {compareList.map(product => (
-                                        <div key={product.id} className="w-56 bg-white rounded-xl shadow-sm p-4 shrink-0 relative">
-                                            <button onClick={() => toggleCompare(product)} className="absolute top-2 right-2 p-1 bg-gray-100 rounded-full hover:bg-gray-200"><X size={16} /></button>
-                                            <div className="h-32 mb-2 flex items-center justify-center bg-gray-50 rounded-lg">
-                                                <img src={product.image} alt={product.name} className="max-h-full max-w-full object-contain" />
-                                            </div>
-                                            <h3 className="font-bold text-sm line-clamp-2 h-10 mb-6 text-center">{product.name}</h3>
-                                            
-                                            <div className="flex flex-col gap-4 text-sm">
-                                                <div className="h-10 flex items-center text-blue-600 font-bold text-lg">{product.price.toLocaleString()}원</div>
-                                                <div className="h-10 flex items-center">
-                                                    <Star size={16} className="text-yellow-500 fill-current mr-1" />
-                                                    {product.rating} <span className="text-xs text-gray-400 ml-1">({product.reviewCount})</span>
-                                                </div>
-                                                <div className="h-10 flex items-center">
-                                                    <span className={`px-2 py-1 rounded text-xs font-bold ${product.safetyScore >= 90 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                                        {product.safetyScore}점
-                                                    </span>
-                                                </div>
-                                                <div className="h-20 text-xs text-gray-600 overflow-y-auto leading-relaxed border-t border-b py-1">
-                                                    {product.mainIngredients.join(', ')}
-                                                </div>
-                                                <div className="h-10 flex flex-wrap gap-1 content-center">
-                                                    {product.skinTypes.map(type => (
-                                                        <span key={type} className="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-600">{type}</span>
-                                                    ))}
-                                                </div>
-                                                <div className="h-10 flex flex-wrap gap-1 content-center">
-                                                    {product.skinConcerns.map(c => (
-                                                        <span key={c} className="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded">{c}</span>
-                                                    ))}
-                                                </div>
-                                                
-                                                <button onClick={() => navigateTo('detail', product)} className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm mt-2 hover:bg-blue-700">상세보기</button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                );
+            const toggleCompare = (product) => {
+                setCompareList(prev => {
+                    const exists = prev.find(p => p.id === product.id);
+                    if (exists) {
+                        return prev.filter(p => p.id !== product.id);
+                    } else if (prev.length < 3) {
+                        return [...prev, product];
+                    } else {
+                        alert("비교는 최대 3개까지만 가능합니다.");
+                        return prev;
+                    }
+                });
             };
             
             return (
                 <div className="relative">
-                    {currentPage === 'home' && <HomePage />}
-                    {currentPage === 'detail' && <DetailPage />}
-                    {currentPage === 'favorites' && <FavoritesPage />}
-                    {currentPage === 'compare' && <ComparePage />}
+                    {currentPage === 'home' && (
+                        <HomePage 
+                            searchQuery={searchQuery}
+                            setSearchQuery={setSearchQuery}
+                            selectedCategory={selectedCategory}
+                            setSelectedCategory={setSelectedCategory}
+                            selectedPriceRange={selectedPriceRange}
+                            setSelectedPriceRange={setSelectedPriceRange}
+                            selectedSkinConcern={selectedSkinConcern}
+                            setSelectedSkinConcern={setSelectedSkinConcern}
+                            filteredProducts={filteredProducts}
+                            favorites={favorites}
+                            toggleFavorite={toggleFavorite}
+                            compareList={compareList}
+                            toggleCompare={toggleCompare}
+                            navigateTo={navigateTo}
+                            categories={categories}
+                            priceRanges={priceRanges}
+                            skinConcernOptions={skinConcernOptions}
+                        />
+                    )}
+                    {currentPage === 'detail' && (
+                        <DetailPage 
+                            selectedProduct={selectedProduct}
+                            goBack={goBack}
+                            favorites={favorites}
+                            toggleFavorite={toggleFavorite}
+                        />
+                    )}
+                    {currentPage === 'favorites' && (
+                        <FavoritesPage 
+                            favorites={favorites}
+                            toggleFavorite={toggleFavorite}
+                            navigateTo={navigateTo}
+                            goBack={goBack}
+                        />
+                    )}
+                    {currentPage === 'compare' && (
+                        <ComparePage 
+                            compareList={compareList}
+                            setCompareList={setCompareList}
+                            toggleCompare={toggleCompare}
+                            navigateTo={navigateTo}
+                            goBack={goBack}
+                            setCurrentPage={setCurrentPage}
+                        />
+                    )}
                     
                     <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
                         <div className="max-w-screen-xl mx-auto px-4 py-2">
