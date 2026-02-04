@@ -284,60 +284,78 @@
                             </h2>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 gap-3">
                             {filteredProducts.map(product => (
-                                <div key={product.id} className="bg-zinc-900 rounded-xl border border-zinc-800 hover:border-zinc-700 transition p-4">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <span className="px-3 py-1 bg-zinc-800 text-gray-300 rounded-lg text-sm font-medium">
-                                            {product.category}
-                                        </span>
-                                        <button onClick={() => toggleFavorite(product.id)}>
-                                            <Heart
-                                                size={20}
-                                                className={favorites.includes(product.id) ? "text-red-500 fill-current" : "text-gray-600 hover:text-gray-400"}
-                                            />
-                                        </button>
-                                    </div>
-
-                                    <h3 className="font-bold text-lg mb-2 line-clamp-2 text-white">{product.name}</h3>
-                                    <p className="text-gray-500 text-sm mb-3">{product.brand}</p>
-
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <div className="flex items-center gap-1">
-                                            <Star size={16} className="text-yellow-500 fill-current" />
-                                            <span className="font-medium text-white">{product.rating}</span>
-                                        </div>
-                                        <span className="text-gray-600">|</span>
-                                        <span className="text-sm text-gray-500">리뷰 {product.reviewCount}</span>
-                                    </div>
-
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="text-2xl font-bold text-white">
-                                            {product.price.toLocaleString()}원
-                                        </div>
-                                        <div className="flex items-center gap-1 px-2 py-1 bg-green-950 rounded">
-                                            <Award size={14} className="text-green-500" />
-                                            <span className="text-sm font-medium text-green-400">{product.safetyScore}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-2">
-                                        <button
+                                <div key={product.id} className="bg-zinc-900 rounded-xl border border-zinc-800 hover:border-zinc-700 transition">
+                                    <div className="flex gap-3 p-3">
+                                        {/* 제품 이미지 */}
+                                        <img 
+                                            src={product.image} 
+                                            alt={product.name}
+                                            onError={handleImageError}
+                                            className="w-20 h-20 object-cover rounded-lg flex-shrink-0 bg-zinc-800 cursor-pointer"
                                             onClick={() => navigateTo('detail', product)}
-                                            className="flex-1 bg-white text-black py-2 rounded-lg hover:bg-gray-200 transition font-medium"
-                                        >
-                                            상세보기
-                                        </button>
-                                        <button
-                                            onClick={() => toggleCompare(product)}
-                                            className={`px-4 py-2 rounded-lg transition font-medium ${
-                                                compareList.find(p => p.id === product.id)
-                                                    ? 'bg-zinc-700 text-white'
-                                                    : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'
-                                            }`}
-                                        >
-                                            비교
-                                        </button>
+                                        />
+                                        
+                                        {/* 제품 정보 */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <span className="px-2 py-0.5 bg-zinc-800 text-gray-400 rounded text-xs">
+                                                    {product.category}
+                                                </span>
+                                                <button onClick={() => toggleFavorite(product.id)}>
+                                                    <Heart
+                                                        size={16}
+                                                        className={favorites.includes(product.id) ? "text-red-500 fill-current" : "text-gray-600 hover:text-gray-400"}
+                                                    />
+                                                </button>
+                                            </div>
+
+                                            <h3 
+                                                className="font-semibold text-sm mb-0.5 line-clamp-2 text-white cursor-pointer hover:text-gray-300"
+                                                onClick={() => navigateTo('detail', product)}
+                                            >
+                                                {product.name}
+                                            </h3>
+                                            <p className="text-gray-500 text-xs mb-1.5">{product.brand}</p>
+
+                                            <div className="flex items-center gap-2 mb-1.5">
+                                                <div className="flex items-center gap-0.5">
+                                                    <Star size={12} className="text-yellow-500 fill-current" />
+                                                    <span className="font-medium text-xs text-white">{product.rating}</span>
+                                                </div>
+                                                <span className="text-gray-700">·</span>
+                                                <span className="text-xs text-gray-500">리뷰 {product.reviewCount}</span>
+                                                <div className="flex items-center gap-0.5 px-1 py-0.5 bg-green-950 rounded ml-auto">
+                                                    <Award size={10} className="text-green-500" />
+                                                    <span className="text-xs font-medium text-green-400">{product.safetyScore}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between">
+                                                <div className="text-base font-bold text-white">
+                                                    {product.price.toLocaleString()}원
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    <button
+                                                        onClick={() => toggleCompare(product)}
+                                                        className={`px-2 py-0.5 rounded text-xs transition ${
+                                                            compareList.find(p => p.id === product.id)
+                                                                ? 'bg-purple-600 text-white'
+                                                                : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'
+                                                        }`}
+                                                    >
+                                                        비교
+                                                    </button>
+                                                    <button
+                                                        onClick={() => navigateTo('detail', product)}
+                                                        className="px-2 py-0.5 bg-white text-black rounded text-xs hover:bg-gray-200 transition"
+                                                    >
+                                                        상세
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -625,7 +643,21 @@
             );
         };
 
-        const MyPage = ({ goBack }) => {
+        const MyPage = ({ goBack, isLoggedIn, userInfo, handleLogin, handleLogout }) => {
+            const [showLoginForm, setShowLoginForm] = useState(false);
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            
+            const onLogin = () => {
+                if (handleLogin(email, password)) {
+                    setShowLoginForm(false);
+                    setEmail('');
+                    setPassword('');
+                } else {
+                    alert('이메일과 비밀번호(4자 이상)를 확인해주세요.');
+                }
+            };
+            
             return (
                 <div className="min-h-screen bg-black pb-20">
                     {/* 헤더 with 뒤로가기 */}
@@ -649,23 +681,92 @@
                                     <User size={32} className="text-gray-500" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-white mb-1">게스트</h2>
-                                    <p className="text-gray-500 text-sm">mobarecci@example.com</p>
+                                    <h2 className="text-xl font-bold text-white mb-1">
+                                        {isLoggedIn ? userInfo.name : '게스트'}
+                                    </h2>
+                                    <p className="text-gray-500 text-sm">
+                                        {isLoggedIn ? userInfo.email : '로그인이 필요합니다'}
+                                    </p>
                                 </div>
                             </div>
-                            <button className="w-full bg-white text-black py-3 rounded-lg hover:bg-gray-200 font-medium">
-                                로그인하기
-                            </button>
+                            
+                            {/* 로그인 폼 */}
+                            {!isLoggedIn && showLoginForm && (
+                                <div className="mb-4 space-y-3">
+                                    <input
+                                        type="email"
+                                        placeholder="이메일"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white"
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호 (4자 이상)"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && onLogin()}
+                                        className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white"
+                                    />
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={onLogin}
+                                            className="flex-1 bg-white text-black py-3 rounded-lg hover:bg-gray-200 font-medium"
+                                        >
+                                            로그인
+                                        </button>
+                                        <button 
+                                            onClick={() => setShowLoginForm(false)}
+                                            className="flex-1 bg-zinc-800 text-white py-3 rounded-lg hover:bg-zinc-700 font-medium"
+                                        >
+                                            취소
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* 로그인/로그아웃 버튼 */}
+                            {!isLoggedIn && !showLoginForm && (
+                                <button 
+                                    onClick={() => setShowLoginForm(true)}
+                                    className="w-full bg-white text-black py-3 rounded-lg hover:bg-gray-200 font-medium"
+                                >
+                                    로그인하기
+                                </button>
+                            )}
+                            
+                            {isLoggedIn && (
+                                <button 
+                                    onClick={handleLogout}
+                                    className="w-full bg-zinc-800 text-white py-3 rounded-lg hover:bg-zinc-700 font-medium border border-zinc-700"
+                                >
+                                    로그아웃
+                                </button>
+                            )}
                         </div>
 
                         {/* 메뉴 리스트 */}
                         <div className="space-y-2">
-                            <button className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl text-left hover:bg-zinc-800 transition">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-white font-medium">내 정보 수정</span>
-                                    <ChevronDown size={20} className="text-gray-500 -rotate-90" />
-                                </div>
-                            </button>
+                            {/* 로그인 시에만 '내 정보 수정' 표시 */}
+                            {isLoggedIn && (
+                                <button className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl text-left hover:bg-zinc-800 transition">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-white font-medium">내 정보 수정</span>
+                                        <ChevronDown size={20} className="text-gray-500 -rotate-90" />
+                                    </div>
+                                </button>
+                            )}
+                            
+                            {/* 게스트일 때만 '비회원 주문 조회' 표시 */}
+                            {!isLoggedIn && (
+                                <button className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl text-left hover:bg-zinc-800 transition">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-white font-medium">비회원 주문 조회</span>
+                                        <ChevronDown size={20} className="text-gray-500 -rotate-90" />
+                                    </div>
+                                </button>
+                            )}
+                            
                             <button className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl text-left hover:bg-zinc-800 transition">
                                 <div className="flex items-center justify-between">
                                     <span className="text-white font-medium">알림 설정</span>
@@ -703,6 +804,49 @@
             const [selectedCategory, setSelectedCategory] = useState('전체');
             const [favorites, setFavorites] = useState([]);
             const [compareList, setCompareList] = useState([]);
+            
+            // 로그인 상태 관리
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [userInfo, setUserInfo] = useState(null);
+            
+            // 로그인 상태 확인 (localStorage)
+            useEffect(() => {
+                const savedUser = localStorage.getItem('mobarecci_user');
+                if (savedUser) {
+                    try {
+                        const user = JSON.parse(savedUser);
+                        setIsLoggedIn(true);
+                        setUserInfo(user);
+                    } catch (e) {
+                        localStorage.removeItem('mobarecci_user');
+                    }
+                }
+            }, []);
+            
+            // 로그인 함수
+            const handleLogin = (email, password) => {
+                if (email && password.length >= 4) {
+                    const user = {
+                        email: email,
+                        name: email.split('@')[0],
+                        loginDate: new Date().toISOString()
+                    };
+                    localStorage.setItem('mobarecci_user', JSON.stringify(user));
+                    setIsLoggedIn(true);
+                    setUserInfo(user);
+                    setCurrentPage('mypage');
+                    return true;
+                }
+                return false;
+            };
+            
+            // 로그아웃 함수
+            const handleLogout = () => {
+                localStorage.removeItem('mobarecci_user');
+                setIsLoggedIn(false);
+                setUserInfo(null);
+                setCurrentPage('home');
+            };
             
             const [selectedPriceRange, setSelectedPriceRange] = useState('전체');
             const [selectedSkinConcern, setSelectedSkinConcern] = useState('전체');
@@ -803,7 +947,13 @@
                         />
                     )}
                     {currentPage === 'mypage' && (
-                        <MyPage goBack={goBack} />
+                        <MyPage 
+                            goBack={goBack} 
+                            isLoggedIn={isLoggedIn}
+                            userInfo={userInfo}
+                            handleLogin={handleLogin}
+                            handleLogout={handleLogout}
+                        />
                     )}
                     
                     {/* 하단 네비게이션 - 다크 테마 */}
