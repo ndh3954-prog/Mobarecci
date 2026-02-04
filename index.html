@@ -643,19 +643,43 @@
             );
         };
 
-        const MyPage = ({ goBack, isLoggedIn, userInfo, handleLogin, handleLogout }) => {
-            const [showLoginForm, setShowLoginForm] = useState(false);
+        const MyPage = ({ goBack, isLoggedIn, userInfo, handleLogin, handleSignup, handleLogout }) => {
+            const [showAuthForm, setShowAuthForm] = useState(false);
+            const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('');
+            const [name, setName] = useState('');
             
             const onLogin = () => {
-                if (handleLogin(email, password)) {
-                    setShowLoginForm(false);
+                const result = handleLogin(email, password);
+                if (result.success) {
+                    setShowAuthForm(false);
                     setEmail('');
                     setPassword('');
+                    alert(result.message);
                 } else {
-                    alert('이메일과 비밀번호(4자 이상)를 확인해주세요.');
+                    alert(result.message);
                 }
+            };
+            
+            const onSignup = () => {
+                const result = handleSignup(email, password, name);
+                if (result.success) {
+                    setShowAuthForm(false);
+                    setEmail('');
+                    setPassword('');
+                    setName('');
+                    alert(result.message);
+                } else {
+                    alert(result.message);
+                }
+            };
+            
+            const switchAuthMode = (mode) => {
+                setAuthMode(mode);
+                setEmail('');
+                setPassword('');
+                setName('');
             };
             
             return (
@@ -690,48 +714,140 @@
                                 </div>
                             </div>
                             
-                            {/* 로그인 폼 */}
-                            {!isLoggedIn && showLoginForm && (
-                                <div className="mb-4 space-y-3">
-                                    <input
-                                        type="email"
-                                        placeholder="이메일"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white"
-                                    />
-                                    <input
-                                        type="password"
-                                        placeholder="비밀번호 (4자 이상)"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && onLogin()}
-                                        className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white"
-                                    />
-                                    <div className="flex gap-2">
-                                        <button 
-                                            onClick={onLogin}
-                                            className="flex-1 bg-white text-black py-3 rounded-lg hover:bg-gray-200 font-medium"
+                            {/* 로그인/회원가입 폼 */}
+                            {!isLoggedIn && showAuthForm && (
+                                <div className="mb-4">
+                                    {/* 탭 */}
+                                    <div className="flex gap-2 mb-4 border-b border-zinc-800">
+                                        <button
+                                            onClick={() => switchAuthMode('login')}
+                                            className={`flex-1 py-3 font-medium transition ${
+                                                authMode === 'login'
+                                                    ? 'text-white border-b-2 border-white'
+                                                    : 'text-gray-500 hover:text-gray-400'
+                                            }`}
                                         >
                                             로그인
                                         </button>
-                                        <button 
-                                            onClick={() => setShowLoginForm(false)}
-                                            className="flex-1 bg-zinc-800 text-white py-3 rounded-lg hover:bg-zinc-700 font-medium"
+                                        <button
+                                            onClick={() => switchAuthMode('signup')}
+                                            className={`flex-1 py-3 font-medium transition ${
+                                                authMode === 'signup'
+                                                    ? 'text-white border-b-2 border-white'
+                                                    : 'text-gray-500 hover:text-gray-400'
+                                            }`}
                                         >
-                                            취소
+                                            회원가입
                                         </button>
                                     </div>
+                                    
+                                    {/* 로그인 폼 */}
+                                    {authMode === 'login' && (
+                                        <div className="space-y-3">
+                                            <input
+                                                type="email"
+                                                placeholder="이메일"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white"
+                                            />
+                                            <input
+                                                type="password"
+                                                placeholder="비밀번호 (4자 이상)"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                onKeyPress={(e) => e.key === 'Enter' && onLogin()}
+                                                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white"
+                                            />
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={onLogin}
+                                                    className="flex-1 bg-white text-black py-3 rounded-lg hover:bg-gray-200 font-medium"
+                                                >
+                                                    로그인
+                                                </button>
+                                                <button 
+                                                    onClick={() => setShowAuthForm(false)}
+                                                    className="flex-1 bg-zinc-800 text-white py-3 rounded-lg hover:bg-zinc-700 font-medium"
+                                                >
+                                                    취소
+                                                </button>
+                                            </div>
+                                            <p className="text-center text-gray-500 text-sm mt-2">
+                                                계정이 없으신가요? 
+                                                <button 
+                                                    onClick={() => switchAuthMode('signup')}
+                                                    className="text-white hover:underline ml-1"
+                                                >
+                                                    회원가입
+                                                </button>
+                                            </p>
+                                        </div>
+                                    )}
+                                    
+                                    {/* 회원가입 폼 */}
+                                    {authMode === 'signup' && (
+                                        <div className="space-y-3">
+                                            <input
+                                                type="text"
+                                                placeholder="이름 (2자 이상)"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white"
+                                            />
+                                            <input
+                                                type="email"
+                                                placeholder="이메일"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white"
+                                            />
+                                            <input
+                                                type="password"
+                                                placeholder="비밀번호 (4자 이상)"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                onKeyPress={(e) => e.key === 'Enter' && onSignup()}
+                                                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white"
+                                            />
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={onSignup}
+                                                    className="flex-1 bg-white text-black py-3 rounded-lg hover:bg-gray-200 font-medium"
+                                                >
+                                                    회원가입
+                                                </button>
+                                                <button 
+                                                    onClick={() => setShowAuthForm(false)}
+                                                    className="flex-1 bg-zinc-800 text-white py-3 rounded-lg hover:bg-zinc-700 font-medium"
+                                                >
+                                                    취소
+                                                </button>
+                                            </div>
+                                            <p className="text-center text-gray-500 text-sm mt-2">
+                                                이미 계정이 있으신가요? 
+                                                <button 
+                                                    onClick={() => switchAuthMode('login')}
+                                                    className="text-white hover:underline ml-1"
+                                                >
+                                                    로그인
+                                                </button>
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             
-                            {/* 로그인/로그아웃 버튼 */}
-                            {!isLoggedIn && !showLoginForm && (
+                            {/* 로그인/회원가입 버튼 */}
+                            {!isLoggedIn && !showAuthForm && (
                                 <button 
-                                    onClick={() => setShowLoginForm(true)}
+                                    onClick={() => {
+                                        setShowAuthForm(true);
+                                        setAuthMode('signup'); // 기본값을 회원가입으로 설정
+                                    }}
                                     className="w-full bg-white text-black py-3 rounded-lg hover:bg-gray-200 font-medium"
                                 >
-                                    로그인하기
+                                    회원가입 / 로그인
                                 </button>
                             )}
                             
@@ -823,21 +939,75 @@
                 }
             }, []);
             
+            // 회원가입 함수
+            const handleSignup = (email, password, name) => {
+                // 유효성 검사
+                if (!email || !email.includes('@')) {
+                    return { success: false, message: '올바른 이메일을 입력해주세요.' };
+                }
+                if (password.length < 4) {
+                    return { success: false, message: '비밀번호는 4자 이상이어야 합니다.' };
+                }
+                if (!name || name.trim().length < 2) {
+                    return { success: false, message: '이름은 2자 이상이어야 합니다.' };
+                }
+                
+                // 기존 회원 목록 가져오기
+                const users = JSON.parse(localStorage.getItem('mobarecci_users') || '[]');
+                
+                // 중복 이메일 확인
+                if (users.find(u => u.email === email)) {
+                    return { success: false, message: '이미 가입된 이메일입니다.' };
+                }
+                
+                // 새 회원 추가
+                const newUser = {
+                    email: email,
+                    password: password, // 실제로는 암호화 필요
+                    name: name.trim(),
+                    joinDate: new Date().toISOString()
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('mobarecci_users', JSON.stringify(users));
+                
+                // 자동 로그인
+                const loginUser = { email: newUser.email, name: newUser.name, loginDate: new Date().toISOString() };
+                localStorage.setItem('mobarecci_user', JSON.stringify(loginUser));
+                setIsLoggedIn(true);
+                setUserInfo(loginUser);
+                setCurrentPage('mypage');
+                
+                return { success: true, message: '회원가입이 완료되었습니다!' };
+            };
+            
             // 로그인 함수
             const handleLogin = (email, password) => {
-                if (email && password.length >= 4) {
-                    const user = {
-                        email: email,
-                        name: email.split('@')[0],
-                        loginDate: new Date().toISOString()
-                    };
-                    localStorage.setItem('mobarecci_user', JSON.stringify(user));
-                    setIsLoggedIn(true);
-                    setUserInfo(user);
-                    setCurrentPage('mypage');
-                    return true;
+                // 유효성 검사
+                if (!email || !password) {
+                    return { success: false, message: '이메일과 비밀번호를 입력해주세요.' };
                 }
-                return false;
+                
+                // 회원 목록에서 확인
+                const users = JSON.parse(localStorage.getItem('mobarecci_users') || '[]');
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                if (!user) {
+                    return { success: false, message: '이메일 또는 비밀번호가 일치하지 않습니다.' };
+                }
+                
+                // 로그인 성공
+                const loginUser = {
+                    email: user.email,
+                    name: user.name,
+                    loginDate: new Date().toISOString()
+                };
+                localStorage.setItem('mobarecci_user', JSON.stringify(loginUser));
+                setIsLoggedIn(true);
+                setUserInfo(loginUser);
+                setCurrentPage('mypage');
+                
+                return { success: true, message: '로그인 성공!' };
             };
             
             // 로그아웃 함수
@@ -952,6 +1122,7 @@
                             isLoggedIn={isLoggedIn}
                             userInfo={userInfo}
                             handleLogin={handleLogin}
+                            handleSignup={handleSignup}
                             handleLogout={handleLogout}
                         />
                     )}
